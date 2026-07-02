@@ -10,7 +10,11 @@ export const catalogApi = baseApi.injectEndpoints({
       query: (id) => `/catalog/subject/${id}`,
       providesTags: ["Content"],
     }),
+    getPublicCatalog: builder.query({
+      query: (programSlug) => `/catalog/public/${programSlug}`,
+      providesTags: ["Subject"],
+    }),
   }),
 });
 
-export const { useGetMyCatalogQuery, useGetSubjectContentQuery } = catalogApi;
+export const { useGetMyCatalogQuery, useGetSubjectContentQuery, useGetPublicCatalogQuery } = catalogApi;

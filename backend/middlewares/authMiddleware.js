@@ -45,6 +45,27 @@ export const protect = asyncHandler(async (req, res, next) => {
   next();
 });
 
+/**
+ * Optional auth for public-but-entitlement-aware endpoints: decodes a Bearer
+ * token if one is present and valid, attaching req.user — but never 401s.
+ * A missing, malformed, or expired token just proceeds as anonymous.
+ */
+export const attachUserIfPresent = asyncHandler(async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) return next();
+
+  try {
+    const decoded = jwt.verify(header.split(" ")[1], env.jwtSecret);
+    const user = await User.findById(decoded.id).select("-passwordHash");
+    if (user && !user.isDeleted && user.isActive && !user.forceLogin) {
+      req.user = user;
+    }
+  } catch {
+    // invalid/expired token — proceed anonymously rather than blocking
+  }
+  next();
+});
+
 /** Role guards — assume `protect` ran first. */
 const requireRole = (...roles) =>
   asyncHandler(async (req, res, next) => {

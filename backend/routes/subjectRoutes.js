@@ -8,12 +8,12 @@ import {
   updateSubject,
   deleteSubject,
 } from "../controllers/subjectController.js";
-import { protect, adminOnly, staffOnly } from "../middlewares/authMiddleware.js";
+import { protect, adminOnly, staffOnly, attachUserIfPresent } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 router.get("/list", protect, staffOnly, listSubjects);
-router.get("/slug/:slug", protect, getSubjectBySlug); // student/staff
+router.get("/slug/:slug", attachUserIfPresent, getSubjectBySlug); // public — entitlement flag when logged in
 router.post("/", protect, adminOnly, createSubject);
 router
   .route("/:id")

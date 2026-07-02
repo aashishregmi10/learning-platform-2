@@ -10,6 +10,10 @@ export const subjectApi = baseApi.injectEndpoints({
       query: (id) => `/subjects/${id}`,
       providesTags: ["Subject"],
     }),
+    getSubjectBySlug: builder.query({
+      query: (slug) => `/subjects/slug/${slug}`,
+      providesTags: ["Subject"],
+    }),
     createSubject: builder.mutation({
       query: (body) => ({ url: "/subjects", method: "POST", body }),
       invalidatesTags: ["Subject", "Year"],
@@ -28,6 +32,7 @@ export const subjectApi = baseApi.injectEndpoints({
 export const {
   useGetSubjectsQuery,
   useGetSubjectQuery,
+  useGetSubjectBySlugQuery,
   useCreateSubjectMutation,
   useUpdateSubjectMutation,
   useDeleteSubjectMutation,

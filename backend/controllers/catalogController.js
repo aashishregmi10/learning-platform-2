@@ -80,6 +80,52 @@ export const getMyCatalog = asyncHandler(async (req, res) => {
   });
 });
 
+// @route GET /api/catalog/public/:programSlug  (public) — years + subjects for anonymous browsing
+export const getPublicCatalog = asyncHandler(async (req, res) => {
+  const program = await Program.findOne({ slug: req.params.programSlug, isActive: true, isDeleted: false });
+  if (!program) {
+    res.status(404);
+    throw new Error("Program not found");
+  }
+
+  const years = await BScYear.find({ program: program._id, isActive: true, isDeleted: false }).sort({
+    yearNumber: 1,
+  });
+
+  const yearsWithSubjects = await Promise.all(
+    years.map(async (year) => {
+      const subjects = await Subject.find({
+        year: year._id,
+        isActive: true,
+        isDeleted: false,
+      }).sort({ displayOrder: 1 });
+
+      return {
+        _id: year._id,
+        yearNumber: year.yearNumber,
+        yearName: year.yearName,
+        bundlePrice: year.bundlePrice,
+        subjects: subjects.map((s) => ({
+          _id: s._id,
+          name: s.name,
+          slug: s.slug,
+          thumbnail: s.thumbnail,
+          category: s.category,
+          pricing: s.pricing,
+          totalChapters: s.totalChapters,
+          ratingAverage: s.ratingAverage,
+          ratingCount: s.ratingCount,
+        })),
+      };
+    })
+  );
+
+  res.status(200).json({
+    data: { program: { _id: program._id, name: program.name, slug: program.slug, description: program.description }, years: yearsWithSubjects },
+    message: "OK",
+  });
+});
+
 // @route GET /api/catalog/subject/:id  (student) — chapters + content, gated
 export const getSubjectContent = asyncHandler(async (req, res) => {
   const subject = await Subject.findOne({ _id: req.params.id, isActive: true, isDeleted: false });

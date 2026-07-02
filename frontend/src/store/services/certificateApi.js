@@ -14,6 +14,9 @@ export const certificateApi = baseApi.injectEndpoints({
       query: (subjectId) => ({ url: "/certificates/issue", method: "POST", body: { subjectId } }),
       invalidatesTags: ["Certificate"],
     }),
+    verifyCertificate: builder.query({
+      query: (number) => `/certificates/${number}/verify`,
+    }),
   }),
 });
 
@@ -21,4 +24,5 @@ export const {
   useGetMyCertificatesQuery,
   useGetCertificateStatusQuery,
   useIssueCertificateMutation,
+  useLazyVerifyCertificateQuery,
 } = certificateApi;
