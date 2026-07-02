@@ -80,19 +80,22 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/payouts", payoutRoutes);
 
 // Production: serve the built Vite SPA
-if (env.nodeEnv === "production") {
-  const dist = path.resolve(__dirname, "../frontend/dist");
-  app.use(express.static(dist));
-  app.get("*", (_, res) => res.sendFile(path.join(dist, "index.html")));
-} else {
-  app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
-}
+// if (env.nodeEnv === "production") {
+//   const dist = path.resolve(__dirname, "../frontend/dist");
+//   app.use(express.static(dist));
+//   app.get("*", (_, res) => res.sendFile(path.join(dist, "index.html")));
+// } else {
+//   app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
+// }
+
+// ✅ KEEP ONLY THIS:
+app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
 
 app.use(NOT_FOUND_HANDLER);
 app.use(ERROR_HANDLER);
 
 server.listen(env.port, () =>
-  console.log(`🚀 Server in ${env.nodeEnv} on port ${env.port}`)
+  console.log(`🚀 Server in ${env.nodeEnv} on port ${env.port}`),
 );
 
 // payment reconciliation safety net
