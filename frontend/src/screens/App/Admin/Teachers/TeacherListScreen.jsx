@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { Button, Chip, IconButton } from "@mui/material";
-import { Add, EditOutlined } from "@mui/icons-material";
+import { Button, Chip } from "@mui/material";
+import { Add, MenuBookOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
@@ -19,23 +19,36 @@ const TeacherListScreen = () => {
   });
 
   const columns = [
-    { name: "Name", selector: (r) => r.name, sortable: true },
+    {
+      name: "Name",
+      cell: (r) => (
+        <Link to={`/app/admin/teachers/${r._id}`} style={{ color: "#1976d3", fontWeight: 600, textDecoration: "none" }}>
+          {r.name}
+        </Link>
+      ),
+      sortable: true,
+    },
     { name: "Email", selector: (r) => r.email },
     {
       name: "Assigned",
       cell: (r) => <Chip size="small" label={`${r.assignedSubjectsCount ?? 0} subject${r.assignedSubjectsCount === 1 ? "" : "s"}`} color={r.assignedSubjectsCount ? "success" : "default"} />,
-      width: "150px",
+      width: "140px",
     },
-    { name: "Verified", selector: (r) => (r.isVerified ? "Yes" : "No"), width: "100px" },
     { name: "Active", selector: (r) => (r.isActive ? "Yes" : "No"), width: "90px" },
     {
-      name: "",
+      name: "Subjects",
       cell: (r) => (
-        <IconButton component={Link} to={`/app/admin/teachers/${r._id}`} size="small" title="Manage assignments">
-          <EditOutlined fontSize="small" />
-        </IconButton>
+        <Button
+          component={Link}
+          to={`/app/admin/teachers/${r._id}`}
+          size="small"
+          variant="outlined"
+          startIcon={<MenuBookOutlined fontSize="small" />}
+        >
+          Assign
+        </Button>
       ),
-      width: "60px",
+      width: "160px",
     },
   ];
 
