@@ -88,7 +88,7 @@ app.use("/api/payouts", payoutRoutes);
 //   app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
 // }
 
-// ✅ KEEP ONLY THIS:
+// ✅ KEEP ONLY THIS::
 app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
 
 app.use(NOT_FOUND_HANDLER);
