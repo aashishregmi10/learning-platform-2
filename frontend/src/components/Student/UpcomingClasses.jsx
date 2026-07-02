@@ -1,5 +1,9 @@
+import { VideocamOutlined } from "@mui/icons-material";
+
 import { useGetUpcomingLiveClassesQuery } from "../../store/services/liveClassApi";
 import LiveJoinButton from "./LiveJoinButton";
+import InfoCard from "./InfoCard";
+import EmptyState from "./EmptyState";
 
 const fmt = (d) =>
   new Date(d).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -8,27 +12,26 @@ const UpcomingClasses = () => {
   const { data, isLoading } = useGetUpcomingLiveClassesQuery();
   const classes = data?.data ?? [];
 
-  if (isLoading) return <div style={{ color: "#8C7B6B" }}>Loading…</div>;
+  if (isLoading) return <div style={{ color: "var(--muted)" }}>Loading…</div>;
   if (classes.length === 0) {
-    return <p style={{ color: "#8C7B6B" }}>Nothing scheduled yet — check back soon.</p>;
+    return <EmptyState icon={<VideocamOutlined fontSize="inherit" />} title="Nothing scheduled yet" subtitle="Check back soon for upcoming sessions." />;
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 380px))", gap: 18 }}>
       {classes.map((c) => (
-        <div
+        <InfoCard
           key={c._id}
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #E7E0D4", borderRadius: 10, padding: "12px 16px" }}
-        >
-          <div>
-            <div style={{ fontWeight: 600 }}>{c.title}</div>
-            <div style={{ color: "#8C7B6B", fontSize: 13 }}>
-              {c.subject?.name} · {c.teacher?.name} · {fmt(c.scheduledAt)}
-              {c.status === "live" && <span style={{ color: "#2D5A3D", fontWeight: 600 }}> · Live now</span>}
-            </div>
-          </div>
-          <LiveJoinButton liveClass={c} />
-        </div>
+          pills={[
+            { label: c.subject?.name, tone: "outline" },
+            ...(c.status === "live" ? [{ label: "● LIVE", tone: "solid", color: "#c62828" }] : []),
+          ]}
+          icon={<VideocamOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} />}
+          title={c.title}
+          meta={<span style={{ fontSize: 13, color: "var(--muted)" }}>{c.teacher?.name} · {fmt(c.scheduledAt)}</span>}
+          footerLeft={c.subject?.name}
+          footerRight={<LiveJoinButton liveClass={c} />}
+        />
       ))}
     </div>
   );

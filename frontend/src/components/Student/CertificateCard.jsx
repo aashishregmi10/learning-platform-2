@@ -1,23 +1,18 @@
+import { WorkspacePremiumOutlined } from "@mui/icons-material";
+
+import InfoCard from "./InfoCard";
+
 const CertificateCard = ({ certificate }) => (
-  <div
-    style={{
-      border: "1px solid #E7E0D4", borderRadius: 10, padding: 20,
-      background: "linear-gradient(135deg, #FAF7F2 0%, #fff 100%)",
-    }}
-  >
-    <div style={{ fontSize: 12, letterSpacing: 1, color: "#8C7B6B", textTransform: "uppercase" }}>
-      Certificate of Completion
-    </div>
-    <h3 style={{ margin: "6px 0", color: "#2D5A3D" }}>{certificate.subject?.name}</h3>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-      <span style={{ fontFamily: "monospace", fontSize: 13, color: "#8C7B6B" }}>
-        {certificate.certificateNumber}
-      </span>
-      <span style={{ fontSize: 13, color: "#8C7B6B" }}>
-        {new Date(certificate.issuedAt).toLocaleDateString()}
-      </span>
-    </div>
-  </div>
+  <InfoCard
+    href={`/verify/${certificate.certificateNumber}`}
+    pills={[{ label: "Certified", tone: "solid", color: "var(--student-gold)" }]}
+    icon={<WorkspacePremiumOutlined sx={{ fontSize: 34, color: "var(--student-gold)" }} />}
+    title={certificate.subject?.name}
+    meta={<span style={{ fontSize: 12, color: "var(--muted)" }}>Issued {new Date(certificate.issuedAt).toLocaleDateString()}</span>}
+    footerLeft={<span style={{ fontFamily: "monospace" }}>{certificate.certificateNumber}</span>}
+    footerRight="View & verify →"
+    footerColor="var(--student-gold)"
+  />
 );
 
 export default CertificateCard;

@@ -1,6 +1,34 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+  Chip,
+  Dialog,
+  DialogContent,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import {
+  ExpandMoreOutlined,
+  PlayCircleOutlined,
+  PictureAsPdfOutlined,
+  NotesOutlined,
+  LinkOutlined,
+  HeadphonesOutlined,
+  QuizOutlined,
+  CheckCircle,
+  LockOutlined,
+  ForumOutlined,
+  CloseOutlined,
+} from "@mui/icons-material";
 
 import { useGetSubjectContentQuery } from "../../../store/services/catalogApi";
 import { useLazyPlayContentQuery } from "../../../store/services/contentApi";
@@ -8,6 +36,7 @@ import { useGetSubjectProgressQuery, useSaveProgressMutation } from "../../../st
 import { useGetCertificateStatusQuery } from "../../../store/services/certificateApi";
 import { useGetSubjectReviewsQuery } from "../../../store/services/reviewApi";
 import { useGetChapterDoubtsQuery } from "../../../store/services/doubtApi";
+import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 import VideoPlayer from "../../../components/Student/VideoPlayer";
 import RatingSummary from "../../../components/Student/RatingSummary";
 import ReviewList from "../../../components/Student/ReviewList";
@@ -17,12 +46,18 @@ import DoubtComposer from "../../../components/Student/DoubtComposer";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
-const TYPE_LABEL = { video: "▶ Video", pdf: "📄 PDF", note: "📝 Note", link: "🔗 Link", audio: "🎧 Audio" };
+const TYPE_ICON = {
+  video: <PlayCircleOutlined fontSize="small" />,
+  pdf: <PictureAsPdfOutlined fontSize="small" />,
+  note: <NotesOutlined fontSize="small" />,
+  link: <LinkOutlined fontSize="small" />,
+  audio: <HeadphonesOutlined fontSize="small" />,
+};
 
 const ChapterDoubts = ({ chapterId }) => {
   const { data } = useGetChapterDoubtsQuery(chapterId);
   return (
-    <div style={{ padding: "12px 16px", background: "#fafafa", borderTop: "1px solid #eeeeee" }}>
+    <div style={{ padding: "12px 16px", background: "#fafafa", borderTop: "1px solid #eeeeee", borderRadius: 8 }}>
       <DoubtThread doubts={data?.data} chapter={chapterId} />
       <div style={{ marginTop: 8 }}>
         <DoubtComposer chapter={chapterId} />
@@ -105,129 +140,185 @@ const SubjectViewScreen = () => {
       .catch(() => {});
   };
 
-  if (isLoading) return <div style={{ padding: 24, color: "#6b7280" }}>Loading…</div>;
+  if (isLoading) {
+    return (
+      <BreadcrumbLayout breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: "Loading…" }]} isBusy>
+        <div />
+      </BreadcrumbLayout>
+    );
+  }
   if (!catalog) return <div style={{ padding: 24 }}>Subject not found.</div>;
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto" }}>
-      <Link to="/app/student" style={{ color: "#1976d3", fontSize: 14 }}>← Back to catalog</Link>
-      <h1 style={{ color: "#1976d3", marginTop: 8 }}>{catalog.subject.name}</h1>
-
-      {!entitled && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#edf5ff", border: "1px solid #1976d3", borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
-          <span>Unlock every chapter, PDF, note and video in this subject.</span>
-          <button onClick={enroll} style={{ background: "#1976d3", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
-            Enroll — {money(catalog.subject.pricing?.discountedPrice)}
-          </button>
-        </div>
-      )}
-      {entitled && (
-        <div style={{ background: "#defbe6", border: "1px solid #66bb6a", borderRadius: 10, padding: "10px 16px", marginBottom: 16, color: "#2e7d32" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600 }}>
-            <span>✓ You're enrolled — all content unlocked.</span>
-            {certStatus && certStatus.total > 0 && <span>{certStatus.percent}% complete</span>}
-          </div>
-          {certStatus?.certificate && (
-            <Link to="/app/student/certificates" style={{ color: "#2e7d32", fontSize: 14 }}>
-              🎓 View your certificate →
-            </Link>
+    <BreadcrumbLayout breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: catalog.subject.name }]}>
+      <div style={{ width: "100%" }}>
+        <div
+          style={{
+            borderRadius: 16, overflow: "hidden", marginBottom: 20, padding: "26px 28px",
+            background: "linear-gradient(120deg, var(--student-ink) 0%, var(--student-ink-2) 100%)", color: "#fff",
+          }}
+        >
+          <h1 style={{ margin: 0, fontSize: 27 }}>{catalog.subject.name}</h1>
+          {entitled && certStatus && certStatus.total > 0 && (
+            <div style={{ marginTop: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6, opacity: 0.9 }}>
+                <span>Your progress</span>
+                <span>{certStatus.percent}%</span>
+              </div>
+              <div style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,0.2)", overflow: "hidden" }}>
+                <div style={{ width: `${certStatus.percent}%`, height: "100%", background: "var(--student-gold)", borderRadius: 4 }} />
+              </div>
+            </div>
           )}
         </div>
-      )}
 
-      {catalog.chapters.map((ch) => (
-        <section key={ch._id} style={{ marginBottom: 20, border: "1px solid #e0e0e0", borderRadius: 10, overflow: "hidden" }}>
-          <div style={{ padding: "12px 16px", background: "#f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <strong>{ch.chapterNumber}. {ch.title}</strong>
-            <span style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              {ch.isFreePreview && <span style={{ fontSize: 12, color: "#1976d3", fontWeight: 600 }}>Free preview</span>}
-              {(entitled || ch.isFreePreview) && (
-                <button
-                  onClick={() => setOpenDoubts((s) => ({ ...s, [ch._id]: !s[ch._id] }))}
-                  style={{ background: "none", border: "1px solid #ccc", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12 }}
-                >
-                  💬 Doubts
-                </button>
-              )}
-            </span>
-          </div>
-          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-            {ch.items.map((item) => {
-              const done = !!progress[item._id]?.isCompleted;
-              return (
-                <li key={item._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #eeeeee" }}>
-                  <span style={{ color: item.locked ? "#9e9e9e" : "#1C1C1C" }}>
-                    {done ? "✅" : TYPE_LABEL[item.type]} &nbsp; {item.title}
-                  </span>
-                  {item.locked ? (
-                    <span title="Purchase required" style={{ color: "#9e9e9e", fontSize: 13 }}>🔒 Locked</span>
-                  ) : (
-                    <span style={{ display: "flex", gap: 8 }}>
-                      {!done && (
-                        <button onClick={() => markComplete(item._id)} style={{ background: "transparent", color: "#1976d3", border: "1px solid #1976d3", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 12 }}>
-                          Mark complete
-                        </button>
-                      )}
-                      <button onClick={() => open(item)} style={{ background: "#1976d3", color: "#fff", border: 0, borderRadius: 6, padding: "6px 12px", cursor: "pointer" }}>
-                        Open
-                      </button>
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-            {ch.items.length === 0 && <li style={{ padding: "10px 16px", color: "#6b7280" }}>No content yet.</li>}
-
-            {ch.quizzes?.map((q) => (
-              <li key={q._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #eeeeee", background: "#fffdf5" }}>
-                <span style={{ color: q.locked ? "#9e9e9e" : "#1C1C1C" }}>📝 Quiz &nbsp; {q.title}</span>
-                {q.locked ? (
-                  <span title="Purchase required" style={{ color: "#9e9e9e", fontSize: 13 }}>🔒 Locked</span>
-                ) : (
-                  <button onClick={() => navigate(`/app/student/quizzes/${q._id}`)} style={{ background: "#2D5A3D", color: "#fff", border: 0, borderRadius: 6, padding: "6px 12px", cursor: "pointer" }}>
-                    Take quiz
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-          {openDoubts[ch._id] && <ChapterDoubts chapterId={ch._id} />}
-        </section>
-      ))}
-
-      <section style={{ marginTop: 32, marginBottom: 32 }}>
-        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Reviews</h2>
-        <RatingSummary summary={reviewsData?.summary} />
-        {entitled && (
-          <div style={{ marginTop: 16 }}>
-            <ReviewForm subjectId={id} onDone={refetchReviews} />
+        {!entitled && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-accent)", border: "1px solid var(--student-ink)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+            <span>Unlock every chapter, PDF, note and video in this subject.</span>
+            <button onClick={enroll} style={{ background: "linear-gradient(120deg, var(--student-ink) 0%, var(--student-ink-2) 100%)", color: "#fff", border: 0, borderRadius: 999, padding: "8px 18px", cursor: "pointer", fontWeight: 700, whiteSpace: "nowrap" }}>
+              Enroll — {money(catalog.subject.pricing?.discountedPrice)}
+            </button>
           </div>
         )}
-        <ReviewList reviews={reviewsData?.reviews} />
-      </section>
+        {entitled && (
+          <div style={{ background: "var(--success-accent)", border: "1px solid var(--success)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, color: "#2e7d32" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600 }}>
+              <span>✓ You're enrolled — all content unlocked.</span>
+            </div>
+            {certStatus?.certificate && (
+              <Link to="/app/student/certificates" style={{ color: "#2e7d32", fontSize: 14 }}>
+                🎓 View your certificate →
+              </Link>
+            )}
+          </div>
+        )}
 
-      {noteText !== null && (
-        <div onClick={() => setNoteText(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "grid", placeItems: "center", zIndex: 50 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", padding: 24, borderRadius: 10, maxWidth: 600, maxHeight: "70vh", overflow: "auto" }}>
-            <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{noteText.content}</p>
-            <button onClick={() => { markComplete(noteText.contentId); setNoteText(null); }} style={{ marginTop: 16, background: "#1976d3", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer" }}>
+        {catalog.chapters.map((ch, idx) => (
+          <Accordion key={ch._id} defaultExpanded={idx === 0} disableGutters sx={{ mb: 2, border: "1px solid var(--border)", borderRadius: "10px !important", "&:before": { display: "none" }, overflow: "hidden" }}>
+            <AccordionSummary expandIcon={<ExpandMoreOutlined />} sx={{ bgcolor: "#f5f5f5" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", paddingRight: 8 }}>
+                <strong>{ch.chapterNumber}. {ch.title}</strong>
+                {ch.isFreePreview && <Chip size="small" label="Free preview" sx={{ bgcolor: "var(--primary-accent)", color: "var(--student-ink-2)", fontWeight: 700 }} />}
+              </div>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              {(entitled || ch.isFreePreview) && (
+                <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px" }}>
+                  <Button
+                    size="small"
+                    startIcon={<ForumOutlined fontSize="small" />}
+                    onClick={() => setOpenDoubts((s) => ({ ...s, [ch._id]: !s[ch._id] }))}
+                  >
+                    Doubts
+                  </Button>
+                </div>
+              )}
+              <List disablePadding>
+                {ch.items.map((item) => {
+                  const done = !!progress[item._id]?.isCompleted;
+                  return (
+                    <ListItem
+                      key={item._id}
+                      disablePadding
+                      sx={{ borderTop: "1px solid #eeeeee" }}
+                      secondaryAction={
+                        item.locked ? (
+                          <Chip size="small" icon={<LockOutlined fontSize="small" />} label="Locked" />
+                        ) : (
+                          <span style={{ display: "flex", gap: 8 }}>
+                            {!done && (
+                              <Button size="small" variant="outlined" sx={{ borderColor: "var(--student-ink)", color: "var(--student-ink)" }} onClick={() => markComplete(item._id)}>
+                                Mark complete
+                              </Button>
+                            )}
+                            <Button size="small" variant="contained" sx={{ bgcolor: "var(--student-ink)", "&:hover": { bgcolor: "var(--student-ink-2)" } }} onClick={() => open(item)}>
+                              Open
+                            </Button>
+                          </span>
+                        )
+                      }
+                    >
+                      <ListItemButton disabled={item.locked} onClick={() => open(item)} sx={{ pr: 22 }}>
+                        <ListItemIcon sx={{ minWidth: 34, color: item.locked ? "#9e9e9e" : "var(--student-ink)" }}>
+                          {done ? <CheckCircle fontSize="small" sx={{ color: "var(--success)" }} /> : TYPE_ICON[item.type]}
+                        </ListItemIcon>
+                        <ListItemText primary={item.title} sx={{ color: item.locked ? "#9e9e9e" : "inherit" }} />
+                      </ListItemButton>
+                    </ListItem>
+                  );
+                })}
+                {ch.items.length === 0 && (
+                  <ListItem sx={{ borderTop: "1px solid #eeeeee" }}>
+                    <ListItemText primary="No content yet." sx={{ color: "var(--muted)" }} />
+                  </ListItem>
+                )}
+
+                {ch.quizzes?.map((q) => (
+                  <ListItem
+                    key={q._id}
+                    disablePadding
+                    sx={{ borderTop: "1px solid #eeeeee", bgcolor: "#fffdf5" }}
+                    secondaryAction={
+                      q.locked ? (
+                        <Chip size="small" icon={<LockOutlined fontSize="small" />} label="Locked" />
+                      ) : (
+                        <Button size="small" variant="contained" sx={{ bgcolor: "#2D5A3D", "&:hover": { bgcolor: "#234a30" } }} onClick={() => navigate(`/app/student/quizzes/${q._id}`)}>
+                          Take quiz
+                        </Button>
+                      )
+                    }
+                  >
+                    <ListItemButton disabled={q.locked} onClick={() => !q.locked && navigate(`/app/student/quizzes/${q._id}`)} sx={{ pr: 20 }}>
+                      <ListItemIcon sx={{ minWidth: 34, color: q.locked ? "#9e9e9e" : "var(--student-ink)" }}>
+                        <QuizOutlined fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary={q.title} sx={{ color: q.locked ? "#9e9e9e" : "inherit" }} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+              {openDoubts[ch._id] && <ChapterDoubts chapterId={ch._id} />}
+            </AccordionDetails>
+          </Accordion>
+        ))}
+
+        <section style={{ marginTop: 32, marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, marginBottom: 12 }}>Reviews</h2>
+          <RatingSummary summary={reviewsData?.summary} />
+          {entitled && (
+            <div style={{ marginTop: 16 }}>
+              <ReviewForm subjectId={id} onDone={refetchReviews} />
+            </div>
+          )}
+          <ReviewList reviews={reviewsData?.reviews} />
+        </section>
+
+        <Dialog open={noteText !== null} onClose={() => setNoteText(null)} maxWidth="sm" fullWidth>
+          <DialogContent>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <IconButton size="small" onClick={() => setNoteText(null)}><CloseOutlined fontSize="small" /></IconButton>
+            </div>
+            <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{noteText?.content}</p>
+            <Button
+              variant="contained"
+              sx={{ mt: 2, bgcolor: "var(--student-ink)", "&:hover": { bgcolor: "var(--student-ink-2)" } }}
+              onClick={() => { markComplete(noteText.contentId); setNoteText(null); }}
+            >
               Mark as read & close
-            </button>
-          </div>
-        </div>
-      )}
+            </Button>
+          </DialogContent>
+        </Dialog>
 
-      {playing !== null && (
-        <div onClick={() => setPlaying(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.7)", display: "grid", placeItems: "center", zIndex: 50, padding: 24 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", padding: 16, borderRadius: 10, maxWidth: 900, width: "100%" }}>
-            <VideoPlayer url={playing.url} initialPosition={playing.lastPosition} onProgress={onVideoProgress} />
-            <button onClick={() => setPlaying(null)} style={{ marginTop: 12, background: "transparent", border: "1px solid #ccc", borderRadius: 6, padding: "8px 16px", cursor: "pointer" }}>
+        <Dialog open={playing !== null} onClose={() => setPlaying(null)} maxWidth="md" fullWidth>
+          <DialogContent>
+            {playing && <VideoPlayer url={playing.url} initialPosition={playing.lastPosition} onProgress={onVideoProgress} />}
+            <Button variant="outlined" sx={{ mt: 2 }} onClick={() => setPlaying(null)}>
               Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+            </Button>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </BreadcrumbLayout>
   );
 };
 

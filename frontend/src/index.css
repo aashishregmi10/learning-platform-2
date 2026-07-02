@@ -10,6 +10,12 @@
   --success-accent: #defbe6;
   --border: #e0e0e0;
   --muted: #6b7280;
+
+  /* Student paid-area accent — blue = structural/CTA (matches reference), gold = rating/achievement only */
+  --student-ink: #4c8dfb;
+  --student-ink-2: #2f6fed;
+  --student-gold: #c9962b;
+  --student-gold-soft: #fbf1dc;
 }
 
 * {
@@ -35,4 +41,13 @@ body {
 
 a {
   color: inherit;
+}
+
+/* Public storefront card hover-lift — inline styles can't express :hover */
+.guest-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.guest-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(25, 118, 211, 0.12);
 }

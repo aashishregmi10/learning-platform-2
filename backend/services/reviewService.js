@@ -1,13 +1,20 @@
+import mongoose from "mongoose";
+
 import Review from "../models/Review.js";
 import Subject from "../models/Subject.js";
 import TeacherProfile from "../models/TeacherProfile.js";
+
+// Aggregation $match requires exact BSON-type equality — a raw string id
+// (e.g. straight from req.body) silently matches nothing against an
+// ObjectId-typed field, unlike Mongoose's auto-casting find().
+const toId = (id) => (mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id);
 
 /** Recompute the cached ratingAverage/ratingCount for a subject or teacher target. */
 export const recomputeRating = async ({ targetType, subjectId, teacherId }) => {
   const match =
     targetType === "subject"
-      ? { targetType: "subject", subject: subjectId, isVisible: true }
-      : { targetType: "teacher", teacher: teacherId, isVisible: true };
+      ? { targetType: "subject", subject: toId(subjectId), isVisible: true }
+      : { targetType: "teacher", teacher: toId(teacherId), isVisible: true };
 
   const [stats] = await Review.aggregate([
     { $match: match },
@@ -28,8 +35,8 @@ export const recomputeRating = async ({ targetType, subjectId, teacherId }) => {
 export const ratingSummary = async ({ targetType, subjectId, teacherId }) => {
   const match =
     targetType === "subject"
-      ? { targetType: "subject", subject: subjectId, isVisible: true }
-      : { targetType: "teacher", teacher: teacherId, isVisible: true };
+      ? { targetType: "subject", subject: toId(subjectId), isVisible: true }
+      : { targetType: "teacher", teacher: toId(teacherId), isVisible: true };
 
   const rows = await Review.aggregate([{ $match: match }, { $group: { _id: "$rating", count: { $sum: 1 } } }]);
   const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };

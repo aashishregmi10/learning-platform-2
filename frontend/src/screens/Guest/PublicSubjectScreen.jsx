@@ -45,19 +45,30 @@ const PublicSubjectScreen = () => {
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto" }}>
-      <Link to={`/catalog/${subject.program?.slug}`} style={{ color: "#1976d3", fontSize: 14 }}>← Back to {subject.program?.name}</Link>
-      <h1 style={{ color: "#1976d3", marginTop: 8 }}>{subject.name}</h1>
-      <p style={{ color: "#6b7280" }}>{subject.year?.yearName} · {subject.category}</p>
+      <Link to={`/catalog/${subject.program?.slug}`} style={{ color: "var(--primary)", fontSize: 14 }}>← Back to {subject.program?.name}</Link>
+
+      <div
+        style={{
+          borderRadius: 16, overflow: "hidden", margin: "14px 0 20px", padding: "28px 28px",
+          background: "linear-gradient(120deg, #10365e 0%, #1976d3 70%)", color: "#fff",
+        }}
+      >
+        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", background: "rgba(255,255,255,0.18)", borderRadius: 20, padding: "3px 12px" }}>
+          {subject.category}
+        </span>
+        <h1 style={{ margin: "12px 0 4px", fontSize: 28 }}>{subject.name}</h1>
+        <p style={{ margin: 0, opacity: 0.85 }}>{subject.year?.yearName} · {subject.program?.name}</p>
+      </div>
 
       {subject.entitled ? (
-        <div style={{ background: "#defbe6", border: "1px solid #66bb6a", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "#2e7d32", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ background: "var(--success-accent)", border: "1px solid var(--success)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "#2e7d32", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontWeight: 600 }}>✓ You're already enrolled in this subject.</span>
           <Link to={`/app/student/subjects/${subject._id}`} style={{ color: "#2e7d32", fontWeight: 600 }}>Continue learning →</Link>
         </div>
       ) : (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#edf5ff", border: "1px solid #1976d3", borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-accent)", border: "1px solid var(--primary)", borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
           <span>Unlock every chapter, PDF, note and video in this subject.</span>
-          <button onClick={enroll} style={{ background: "#1976d3", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
+          <button onClick={enroll} style={{ background: "var(--primary)", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
             Enroll — {money(subject.pricing?.discountedPrice)}
           </button>
         </div>

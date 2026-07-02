@@ -1,27 +1,43 @@
+import { Skeleton } from "@mui/material";
+import { WorkspacePremiumOutlined } from "@mui/icons-material";
+
 import { useGetMyCertificatesQuery } from "../../../store/services/certificateApi";
+import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 import CertificateCard from "../../../components/Student/CertificateCard";
+import PageHeader from "../../../components/Student/PageHeader";
+import EmptyState from "../../../components/Student/EmptyState";
 
 const CertificatesScreen = () => {
   const { data, isLoading } = useGetMyCertificatesQuery();
   const certificates = data?.data ?? [];
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto" }}>
-      <h1 style={{ color: "#1976d3" }}>My Certificates</h1>
+    <BreadcrumbLayout breadcrumbs={[{ title: "Certificates" }]} isBusy={isLoading}>
+      <div style={{ width: "100%" }}>
+        <PageHeader eyebrow="Achievements" title="My Certificates" subtitle="Every subject you've completed, verified and shareable." />
 
-      {isLoading && <div style={{ color: "#6b7280" }}>Loading…</div>}
-      {!isLoading && certificates.length === 0 && (
-        <p style={{ color: "#8C7B6B" }}>
-          Nothing here yet — complete a subject to earn your first certificate.
-        </p>
-      )}
+        {isLoading && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 380px))", gap: 18 }}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} variant="rounded" height={220} sx={{ borderRadius: "16px" }} />
+            ))}
+          </div>
+        )}
+        {!isLoading && certificates.length === 0 && (
+          <EmptyState
+            icon={<WorkspacePremiumOutlined fontSize="inherit" sx={{ color: "var(--student-gold)" }} />}
+            title="Nothing here yet"
+            subtitle="Complete every chapter of a subject to earn your first certificate."
+          />
+        )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
-        {certificates.map((c) => (
-          <CertificateCard key={c._id} certificate={c} />
-        ))}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 380px))", gap: 18 }}>
+          {certificates.map((c) => (
+            <CertificateCard key={c._id} certificate={c} />
+          ))}
+        </div>
       </div>
-    </div>
+    </BreadcrumbLayout>
   );
 };
 

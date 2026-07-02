@@ -59,6 +59,7 @@ export const getMyCatalog = asyncHandler(async (req, res) => {
             pricing: s.pricing,
             totalChapters: s.totalChapters,
             ratingAverage: s.ratingAverage,
+            ratingCount: s.ratingCount,
             entitled,
           };
         })

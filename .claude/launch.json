@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "D:/learning-platform-2/frontend", "run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "D:/learning-platform-2/backend", "run", "dev"],
+      "port": 5000
     }
   ]
 }

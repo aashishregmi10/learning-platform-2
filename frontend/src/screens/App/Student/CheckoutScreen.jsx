@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Box, Button, Divider, Paper, TextField, Typography } from "@mui/material";
+import { LocalOfferOutlined, LockOutlined } from "@mui/icons-material";
 
 import {
   useCreateOrderMutation,
@@ -12,6 +13,7 @@ import {
   useDevCompleteMutation,
   submitEsewaForm,
 } from "../../../store/services/paymentApi";
+import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
@@ -30,15 +32,6 @@ const CheckoutScreen = () => {
   const cartPayload = items.map((i) => ({ itemType: i.itemType, subject: i.subject, year: i.year, program: i.program }));
   const subtotal = items.reduce((a, i) => a + (i.price || 0), 0);
   const total = preview ? preview.total : subtotal;
-
-  if (!items.length) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography>Your cart is empty.</Typography>
-        <Button onClick={() => navigate("/app/student")}>Back to catalog</Button>
-      </Box>
-    );
-  }
 
   const applyCoupon = async () => {
     try {
@@ -75,43 +68,65 @@ const CheckoutScreen = () => {
   const busy = creating || initiating || simulating;
 
   return (
-    <Box sx={{ maxWidth: 560, mx: "auto" }}>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>Checkout</Typography>
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        {items.map((i, idx) => (
-          <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", py: 1 }}>
-            <span>{i.title}</span>
-            <span style={{ fontVariantNumeric: "tabular-nums" }}>{money(i.price)}</span>
-          </Box>
-        ))}
-        <Divider sx={{ my: 1 }} />
-        <Box sx={{ display: "flex", gap: 1, my: 1 }}>
-          <TextField size="small" label="Coupon code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} fullWidth />
-          <Button variant="outlined" onClick={applyCoupon} disabled={!code || validating}>Apply</Button>
-        </Box>
-        {preview && (
-          <Box sx={{ display: "flex", justifyContent: "space-between", color: "success.main" }}>
-            <span>Coupon discount</span>
-            <span>− {money(preview.discount)}</span>
-          </Box>
-        )}
-        <Divider sx={{ my: 1 }} />
-        <Box sx={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 18 }}>
-          <span>Total</span>
-          <span>{money(total)}</span>
-        </Box>
+    <BreadcrumbLayout breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: "Checkout" }]}>
+      <Box sx={{ maxWidth: 640, mx: "auto" }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>Checkout</Typography>
 
-        <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-          <Button variant="contained" size="large" disabled={busy} onClick={payWithEsewa}
-            sx={{ bgcolor: "#60bb46", "&:hover": { bgcolor: "#4e9e39" } }}>
-            Pay with eSewa
-          </Button>
-          <Button variant="text" size="small" disabled={busy} onClick={simulatePay}>
-            Simulate payment (dev)
-          </Button>
-        </Box>
-      </Paper>
-    </Box>
+        {!items.length ? (
+          <Box>
+            <Typography sx={{ mb: 2 }}>Your cart is empty.</Typography>
+            <Button variant="contained" sx={{ bgcolor: "var(--student-ink)", "&:hover": { bgcolor: "var(--student-ink-2)" } }} onClick={() => navigate("/app/student")}>
+              Back to catalog
+            </Button>
+          </Box>
+        ) : (
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Typography variant="overline" sx={{ color: "var(--muted)", fontWeight: 700 }}>Order summary</Typography>
+            {items.map((i, idx) => (
+              <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", py: 1 }}>
+                <span>{i.title}</span>
+                <span style={{ fontVariantNumeric: "tabular-nums" }}>{money(i.price)}</span>
+              </Box>
+            ))}
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="overline" sx={{ color: "var(--muted)", fontWeight: 700, display: "flex", alignItems: "center", gap: 0.5 }}>
+              <LocalOfferOutlined fontSize="inherit" /> Coupon
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, my: 1 }}>
+              <TextField size="small" label="Coupon code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} fullWidth />
+              <Button variant="outlined" sx={{ borderColor: "var(--student-ink)", color: "var(--student-ink)" }} onClick={applyCoupon} disabled={!code || validating}>Apply</Button>
+            </Box>
+            {preview && (
+              <Box sx={{ display: "flex", justifyContent: "space-between", color: "success.main" }}>
+                <span>Coupon discount</span>
+                <span>− {money(preview.discount)}</span>
+              </Box>
+            )}
+
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 18, borderTop: "2px solid var(--student-ink-2)", pt: 1.5 }}>
+              <span>Total</span>
+              <span>{money(total)}</span>
+            </Box>
+
+            <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+              <Button variant="contained" size="large" disabled={busy} onClick={payWithEsewa}
+                sx={{ bgcolor: "#60bb46", "&:hover": { bgcolor: "#4e9e39" } }}>
+                Pay with eSewa
+              </Button>
+              <Typography variant="caption" sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center", color: "var(--muted)" }}>
+                <LockOutlined sx={{ fontSize: 14 }} /> Secure payment via eSewa
+              </Typography>
+              <Button variant="text" size="small" disabled={busy} onClick={simulatePay}>
+                Simulate payment (dev)
+              </Button>
+            </Box>
+          </Paper>
+        )}
+      </Box>
+    </BreadcrumbLayout>
   );
 };
 

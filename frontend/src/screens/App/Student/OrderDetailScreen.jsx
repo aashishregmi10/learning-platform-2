@@ -1,7 +1,8 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Alert, Box, Button, Chip, Divider, Paper, Typography } from "@mui/material";
+import { Chip } from "@mui/material";
 
 import { useGetOrderQuery } from "../../../store/services/orderApi";
+import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 const STATUS_COLOR = { paid: "success", pending: "warning", failed: "error", refunded: "default", cancelled: "default" };
@@ -13,49 +14,67 @@ const OrderDetailScreen = () => {
   const { data, isLoading } = useGetOrderQuery(id, { pollingInterval: returnStatus === "paid" ? 2000 : 0 });
 
   const order = data?.data;
-  if (isLoading) return <Box sx={{ p: 3 }}>Loading order…</Box>;
-  if (!order) return <Box sx={{ p: 3 }}>Order not found.</Box>;
 
   return (
-    <Box sx={{ maxWidth: 560, mx: "auto" }}>
-      {returnStatus === "paid" && order.status === "paid" && (
-        <Alert severity="success" sx={{ mb: 2 }}>Payment successful — your access is unlocked.</Alert>
-      )}
-      {returnStatus === "failed" && (
-        <Alert severity="error" sx={{ mb: 2 }}>Payment was not completed. You can try again from the catalog.</Alert>
-      )}
+    <BreadcrumbLayout
+      breadcrumbs={[{ title: "Orders", path: "/app/student/orders" }, { title: order?.invoiceNumber || "Receipt" }]}
+      isBusy={isLoading}
+    >
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
+        {!isLoading && !order && <div>Order not found.</div>}
+        {order && (
+          <>
+            {returnStatus === "paid" && order.status === "paid" && (
+              <div style={{ background: "var(--success-accent)", border: "1px solid var(--success)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "#2e7d32", fontWeight: 600 }}>
+                ✓ Payment successful — your access is unlocked.
+              </div>
+            )}
+            {returnStatus === "failed" && (
+              <div style={{ background: "#fdecea", border: "1px solid #e57373", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "#b3261e", fontWeight: 600 }}>
+                Payment was not completed. You can try again from the catalog.
+              </div>
+            )}
 
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-          <Typography variant="h6">Order</Typography>
-          <Chip size="small" label={order.status} color={STATUS_COLOR[order.status] || "default"} />
-        </Box>
-        <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-          {order.invoiceNumber || order._id}
-        </Typography>
+            <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+              <div style={{ background: "linear-gradient(120deg, var(--student-ink) 0%, var(--student-ink-2) 100%)", color: "#fff", padding: "20px 24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", opacity: 0.8 }}>Order Receipt</span>
+                  <Chip size="small" label={order.status} color={STATUS_COLOR[order.status] || "default"} />
+                </div>
+                <div style={{ fontFamily: "monospace", fontSize: 13, opacity: 0.85, marginTop: 4 }}>{order.invoiceNumber || order._id}</div>
+              </div>
 
-        {order.items.map((i, idx) => (
-          <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", py: 0.5 }}>
-            <span>{i.title}</span>
-            <span>{money(i.discountedPrice)}</span>
-          </Box>
-        ))}
-        <Divider sx={{ my: 1 }} />
-        {order.couponDiscount > 0 && (
-          <Box sx={{ display: "flex", justifyContent: "space-between", color: "success.main" }}>
-            <span>Coupon</span><span>− {money(order.couponDiscount)}</span>
-          </Box>
+              <div style={{ padding: "20px 24px" }}>
+                {order.items.map((i, idx) => (
+                  <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", fontSize: 14 }}>
+                    <span>{i.title}</span>
+                    <span style={{ fontFamily: "monospace" }}>{money(i.discountedPrice)}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: "1px dashed var(--border)", margin: "10px 0" }} />
+                {order.couponDiscount > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "var(--success)", fontSize: 14 }}>
+                    <span>Coupon</span><span style={{ fontFamily: "monospace" }}>− {money(order.couponDiscount)}</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: 17, marginTop: 6, paddingTop: 10, borderTop: "2px solid var(--student-ink-2)" }}>
+                  <span>Total</span><span style={{ fontFamily: "monospace" }}>{money(order.totalAmount)}</span>
+                </div>
+
+                <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+                  <Link to="/app/student" style={{ textDecoration: "none", flex: 1, textAlign: "center", background: "var(--student-ink)", color: "#fff", fontWeight: 700, borderRadius: 8, padding: "10px 0" }}>
+                    Go to catalog
+                  </Link>
+                  <Link to="/app/student/subscriptions" style={{ textDecoration: "none", flex: 1, textAlign: "center", background: "#fff", color: "var(--student-ink)", fontWeight: 700, border: "1px solid var(--student-ink)", borderRadius: 8, padding: "10px 0" }}>
+                    My subscriptions
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </>
         )}
-        <Box sx={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
-          <span>Total</span><span>{money(order.totalAmount)}</span>
-        </Box>
-
-        <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-          <Button component={Link} to="/app/student" variant="contained">Go to catalog</Button>
-          <Button component={Link} to="/app/student/subscriptions" variant="outlined">My subscriptions</Button>
-        </Box>
-      </Paper>
-    </Box>
+      </div>
+    </BreadcrumbLayout>
   );
 };
 
