@@ -1,0 +1,20 @@
+{
+  "name": "learning-platform-2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "B.Sc Nepal — MERN learning platform",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm run server\" \"npm run client\"",
+    "server": "npm --prefix backend run dev",
+    "client": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix backend start",
+    "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install"
+  },
+  "author": "aashishregmi",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

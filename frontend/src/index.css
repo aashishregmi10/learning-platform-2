@@ -1,0 +1,38 @@
+/* Montserrat — mirrors can-logistic's global font */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --primary: #1976d3;
+  --primary-accent: #edf5ff;
+  --background: #fafafa;
+  --white: #ffffff;
+  --success: #66bb6a;
+  --success-accent: #defbe6;
+  --border: #e0e0e0;
+  --muted: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html * {
+  font-family: "Montserrat", sans-serif !important;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-size: 16px;
+  background: var(--background);
+  color: #1c1c1c;
+}
+
+a {
+  color: inherit;
+}
