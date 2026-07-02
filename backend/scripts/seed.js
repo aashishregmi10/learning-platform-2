@@ -122,11 +122,11 @@ Login credentials
   Student  : student@bsc.np  (Google-only; use the "Dev login as student" button in dev)
 
 Catalog
-  Program  : B.Sc CSIT (active)
+  Program  : B.Sc CSIT (active )
   Year     : 1st Year — bundle NPR 15,000
   Subjects : Introduction to C Programming (NPR 1,999), Digital Logic (NPR 1,799)
   Chapters : "Getting Started with C" (free preview) + "Pointers & Memory" (paid)
-  Coupon   : SAVE20 (20% off)
+  Coupon   : SAVE20 (20% off).
 `);
 
 await mongoose.disconnect();
