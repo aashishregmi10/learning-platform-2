@@ -1,4 +1,6 @@
-// Idempotent demo seed. Safe to run repeatedly — it upserts by natural keys.
+// Idempotent demo seed. Safe to run repeatedly — it wipes and rebuilds the
+// catalog (Subject/Chapter/Content + everything downstream of them) on every
+// run, and upserts users/program by natural keys.
 //   node scripts/seed.js
 import dns from "dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
@@ -15,6 +17,14 @@ import BScYear from "../models/BScYear.js";
 import Subject from "../models/Subject.js";
 import Chapter from "../models/Chapter.js";
 import Content from "../models/Content.js";
+import Quiz from "../models/Quiz.js";
+import LiveClass from "../models/LiveClass.js";
+import Certificate from "../models/Certificate.js";
+import Entitlement from "../models/Entitlement.js";
+import Doubt from "../models/Doubt.js";
+import Review from "../models/Review.js";
+import Progress from "../models/Progress.js";
+import Subscription from "../models/Subscription.js";
 import Coupon from "../models/Coupon.js";
 import { slugify } from "../utils/slug.js";
 
@@ -41,38 +51,73 @@ const student = await upsert(User, { email: "student@bsc.np" }, {
   name: "Ram Student", googleId: "seed-student-google", authProvider: "google", role: "student", isVerified: true,
 });
 
-// --- catalog ---
+// --- catalog: wipe everything downstream of Subject/Chapter, then rebuild ---
+await Promise.all([
+  Content.deleteMany({}),
+  Quiz.deleteMany({}),
+  Certificate.deleteMany({}),
+  Entitlement.deleteMany({}),
+  Doubt.deleteMany({}),
+  Review.deleteMany({}),
+  Progress.deleteMany({}),
+  Subscription.deleteMany({}),
+  LiveClass.deleteMany({}),
+]);
+await Chapter.deleteMany({});
+await Subject.deleteMany({});
+
 const program = await upsert(Program, { slug: "bsc-csit" }, {
   name: "B.Sc CSIT", code: "CSIT", durationYears: 4, isActive: true,
   description: "Bachelor of Science in Computer Science & Information Technology (TU).",
 });
 
-const year1 = await upsert(BScYear, { program: program._id, yearNumber: 1 }, {
-  yearName: "1st Year", isActive: true,
-  bundlePrice: { originalPrice: 20000, discountedPrice: 15000, currency: "NPR" },
-});
-
-const subjectsSeed = [
-  { name: "Introduction to C Programming", code: "CSC110", price: [2500, 1999] },
-  { name: "Digital Logic", code: "CSC111", price: [2200, 1799] },
+const YEAR_NAMES = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+const SUBJECT_TEMPLATE = [
+  { name: "Chemistry", prefix: "CHEM" },
+  { name: "Biology", prefix: "BIO" },
+  { name: "Physics", prefix: "PHY" },
+  { name: "Zoology", prefix: "ZOO" },
 ];
-const subjects = [];
-for (const s of subjectsSeed) {
-  const subj = await upsert(
-    Subject,
-    { program: program._id, year: year1._id, slug: slugify(s.name) },
-    {
-      name: s.name, subjectCode: s.code, category: "Core", isActive: true,
-      pricing: { originalPrice: s.price[0], discountedPrice: s.price[1], currency: "NPR", validityDays: 365 },
-    }
-  );
-  subjects.push(subj);
+
+const subjectsByYear = []; // subjectsByYear[0] = year1's 4 subjects, etc.
+
+for (let yearNumber = 1; yearNumber <= 4; yearNumber++) {
+  const bundleOriginal = 6000 + (yearNumber - 1) * 800;
+  const bundleDiscounted = 4800 + (yearNumber - 1) * 600;
+
+  const year = await upsert(BScYear, { program: program._id, yearNumber }, {
+    yearName: YEAR_NAMES[yearNumber - 1], isActive: true,
+    bundlePrice: { originalPrice: bundleOriginal, discountedPrice: bundleDiscounted, currency: "NPR" },
+  });
+
+  const subjectOriginal = 1800 + (yearNumber - 1) * 200;
+  const subjectDiscounted = 1450 + (yearNumber - 1) * 150;
+
+  const subjectsThisYear = [];
+  for (const s of SUBJECT_TEMPLATE) {
+    const subj = await upsert(
+      Subject,
+      { program: program._id, year: year._id, slug: slugify(s.name) },
+      {
+        name: s.name, subjectCode: `${s.prefix}${yearNumber}01`, category: "Core", isActive: true,
+        pricing: { originalPrice: subjectOriginal, discountedPrice: subjectDiscounted, currency: "NPR", validityDays: 365 },
+      }
+    );
+    subjectsThisYear.push(subj);
+  }
+  subjectsByYear.push(subjectsThisYear);
+
+  await BScYear.updateOne({ _id: year._id }, { totalSubjects: subjectsThisYear.length });
 }
 
-// assign both subjects to the teacher
+// assign the demo teacher to every 1st-year subject
 await TeacherProfile.findOneAndUpdate(
   { user: teacher._id },
-  { user: teacher._id, assignedSubjects: subjects.map((s) => s._id), isApproved: true, approvedBy: admin._id, approvedAt: new Date() },
+  {
+    user: teacher._id,
+    assignedSubjects: subjectsByYear[0].map((s) => s._id),
+    isApproved: true, approvedBy: admin._id, approvedAt: new Date(),
+  },
   { upsert: true }
 );
 
@@ -83,30 +128,29 @@ await StudentProfile.findOneAndUpdate(
   { upsert: true }
 );
 
-// --- chapters + content for the C subject ---
-const cSubject = subjects[0];
-const ch1 = await upsert(Chapter, { subject: cSubject._id, chapterNumber: 1 }, {
-  title: "Getting Started with C", slug: "getting-started-with-c", isFreePreview: true, isPublished: true, publishedAt: new Date(),
+// --- chapters + content for 1st Year Chemistry (demo content) ---
+const chemistry = subjectsByYear[0][0];
+const ch1 = await upsert(Chapter, { subject: chemistry._id, chapterNumber: 1 }, {
+  title: "Atomic Structure", slug: "atomic-structure", isFreePreview: true, isPublished: true, publishedAt: new Date(),
 });
-const ch2 = await upsert(Chapter, { subject: cSubject._id, chapterNumber: 2 }, {
-  title: "Pointers & Memory", slug: "pointers-memory", isFreePreview: false, isPublished: true, publishedAt: new Date(),
+const ch2 = await upsert(Chapter, { subject: chemistry._id, chapterNumber: 2 }, {
+  title: "Chemical Bonding", slug: "chemical-bonding", isFreePreview: false, isPublished: true, publishedAt: new Date(),
 });
 
-await upsert(Content, { chapter: ch1._id, title: "What is C?" }, {
+await upsert(Content, { chapter: ch1._id, title: "What is an atom?" }, {
   uploadedBy: teacher._id, type: "note", order: 1, isPublished: true, publishedAt: new Date(), status: "ready",
-  noteData: { content: "C is a general-purpose procedural programming language created by Dennis Ritchie...", isDownloadable: true },
+  noteData: { content: "An atom is the smallest unit of matter that retains the properties of an element...", isDownloadable: true },
 });
-await upsert(Content, { chapter: ch1._id, title: "C compiler setup (video)" }, {
+await upsert(Content, { chapter: ch1._id, title: "Electron configuration (video)" }, {
   uploadedBy: teacher._id, type: "link", order: 2, isPublished: true, publishedAt: new Date(), status: "ready",
   storage: { provider: "local", fileKey: "https://www.youtube.com/watch?v=KJgsSFOSQv0" },
 });
-await upsert(Content, { chapter: ch2._id, title: "Pointer arithmetic (paid note)" }, {
+await upsert(Content, { chapter: ch2._id, title: "Ionic vs covalent bonds (paid note)" }, {
   uploadedBy: teacher._id, type: "note", order: 1, isPublished: true, publishedAt: new Date(), status: "ready",
-  noteData: { content: "A pointer stores the address of another variable. Pointer arithmetic...", isDownloadable: true },
+  noteData: { content: "Ionic bonds form through electron transfer; covalent bonds form through electron sharing...", isDownloadable: true },
 });
 
-// keep cached counters roughly in sync
-await Subject.updateOne({ _id: cSubject._id }, { totalChapters: 2, totalNotes: 2 });
+await Subject.updateOne({ _id: chemistry._id }, { totalChapters: 2, totalNotes: 2 });
 
 // --- coupon ---
 await upsert(Coupon, { code: "SAVE20" }, {
@@ -122,11 +166,12 @@ Login credentials
   Student  : student@bsc.np  (Google-only; use the "Dev login as student" button in dev)
 
 Catalog
-  Program  : B.Sc CSIT (active )
-  Year     : 1st Year — bundle NPR 15,000
-  Subjects : Introduction to C Programming (NPR 1,999), Digital Logic (NPR 1,799)
-  Chapters : "Getting Started with C" (free preview) + "Pointers & Memory" (paid)
-  Coupon   : SAVE20 (20% off).
+  Program  : B.Sc CSIT (active)
+  Years    : 1st-4th Year, each with a bundle
+  Subjects : Chemistry, Biology, Physics, Zoology - in every year (16 total)
+  Chapters : 1st Year Chemistry - "Atomic Structure" (free preview) + "Chemical Bonding" (paid)
+  Teacher  : assigned to all 4 subjects of 1st Year
+  Coupon   : SAVE20 (20% off)
 `);
 
 await mongoose.disconnect();
