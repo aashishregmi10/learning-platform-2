@@ -128,29 +128,69 @@ await StudentProfile.findOneAndUpdate(
   { upsert: true }
 );
 
-// --- chapters + content for 1st Year Chemistry (demo content) ---
-const chemistry = subjectsByYear[0][0];
-const ch1 = await upsert(Chapter, { subject: chemistry._id, chapterNumber: 1 }, {
-  title: "Atomic Structure", slug: "atomic-structure", isFreePreview: true, isPublished: true, publishedAt: new Date(),
-});
-const ch2 = await upsert(Chapter, { subject: chemistry._id, chapterNumber: 2 }, {
-  title: "Chemical Bonding", slug: "chemical-bonding", isFreePreview: false, isPublished: true, publishedAt: new Date(),
-});
+// --- chapters + content for every subject ---
+// Topical chapter titles per subject. First chapter of each subject is a free
+// preview; the rest are locked behind entitlement. Each chapter gets an
+// intro note, and the free-preview chapter also gets a demo video link.
+const CHAPTERS_BY_SUBJECT = {
+  Chemistry: ["Atomic Structure", "Chemical Bonding", "Thermodynamics"],
+  Biology: ["Cell Biology", "Genetics", "Evolution"],
+  Physics: ["Mechanics", "Waves & Optics", "Electromagnetism"],
+  Zoology: ["Animal Diversity", "Animal Physiology", "Ecology & Behaviour"],
+};
+const DEMO_VIDEO = "https://www.youtube.com/watch?v=KJgsSFOSQv0";
 
-await upsert(Content, { chapter: ch1._id, title: "What is an atom?" }, {
-  uploadedBy: teacher._id, type: "note", order: 1, isPublished: true, publishedAt: new Date(), status: "ready",
-  noteData: { content: "An atom is the smallest unit of matter that retains the properties of an element...", isDownloadable: true },
-});
-await upsert(Content, { chapter: ch1._id, title: "Electron configuration (video)" }, {
-  uploadedBy: teacher._id, type: "link", order: 2, isPublished: true, publishedAt: new Date(), status: "ready",
-  storage: { provider: "local", fileKey: "https://www.youtube.com/watch?v=KJgsSFOSQv0" },
-});
-await upsert(Content, { chapter: ch2._id, title: "Ionic vs covalent bonds (paid note)" }, {
-  uploadedBy: teacher._id, type: "note", order: 1, isPublished: true, publishedAt: new Date(), status: "ready",
-  noteData: { content: "Ionic bonds form through electron transfer; covalent bonds form through electron sharing...", isDownloadable: true },
-});
+for (let y = 0; y < subjectsByYear.length; y++) {
+  for (const subject of subjectsByYear[y]) {
+    const titles = CHAPTERS_BY_SUBJECT[subject.name] ?? [];
+    let noteCount = 0;
+    let videoCount = 0;
 
-await Subject.updateOne({ _id: chemistry._id }, { totalChapters: 2, totalNotes: 2 });
+    for (let i = 0; i < titles.length; i++) {
+      const isPreview = i === 0;
+      const chapter = await upsert(
+        Chapter,
+        { subject: subject._id, chapterNumber: i + 1 },
+        {
+          title: titles[i], slug: slugify(titles[i]),
+          isFreePreview: isPreview, isPublished: true, publishedAt: new Date(),
+        }
+      );
+
+      await upsert(
+        Content,
+        { chapter: chapter._id, title: `${titles[i]} — overview` },
+        {
+          uploadedBy: teacher._id, type: "note", order: 1,
+          isPublished: true, publishedAt: new Date(), status: "ready",
+          noteData: {
+            content: `Introductory notes on ${titles[i]} for ${subject.name} (${YEAR_NAMES[y]}).`,
+            isDownloadable: true,
+          },
+        }
+      );
+      noteCount += 1;
+
+      if (isPreview) {
+        await upsert(
+          Content,
+          { chapter: chapter._id, title: `${titles[i]} — intro video` },
+          {
+            uploadedBy: teacher._id, type: "link", order: 2,
+            isPublished: true, publishedAt: new Date(), status: "ready",
+            storage: { provider: "local", fileKey: DEMO_VIDEO },
+          }
+        );
+        videoCount += 1;
+      }
+    }
+
+    await Subject.updateOne(
+      { _id: subject._id },
+      { totalChapters: titles.length, totalNotes: noteCount, totalVideos: videoCount }
+    );
+  }
+}
 
 // --- coupon ---
 await upsert(Coupon, { code: "SAVE20" }, {
@@ -169,7 +209,7 @@ Catalog
   Program  : B.Sc CSIT (active)
   Years    : 1st-4th Year, each with a bundle
   Subjects : Chemistry, Biology, Physics, Zoology - in every year (16 total)
-  Chapters : 1st Year Chemistry - "Atomic Structure" (free preview) + "Chemical Bonding" (paid)
+  Chapters : 3 per subject (first = free preview) with intro notes + a demo video
   Teacher  : assigned to all 4 subjects of 1st Year
   Coupon   : SAVE20 (20% off)
 `);

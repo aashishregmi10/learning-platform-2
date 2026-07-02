@@ -30,6 +30,7 @@ import SubjectDetailScreen from "../screens/App/Admin/Catalog/SubjectDetailScree
 import CouponListScreen from "../screens/App/Admin/Coupon/CouponListScreen";
 import CouponFormScreen from "../screens/App/Admin/Coupon/CouponFormScreen";
 import TeacherDashboardScreen from "../screens/App/Teacher/TeacherDashboardScreen";
+import TeacherSubjectsScreen from "../screens/App/Teacher/TeacherSubjectsScreen";
 import QuizListScreen from "../screens/App/Teacher/Quiz/QuizListScreen";
 import QuizFormScreen from "../screens/App/Teacher/Quiz/QuizFormScreen";
 import LiveClassListScreen from "../screens/App/Teacher/LiveClass/LiveClassListScreen";
@@ -95,6 +96,7 @@ const AppRouter = () => {
 
         {/* Teacher */}
         <Route path="teacher" element={<TeacherOnly><TeacherDashboardScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects" element={<TeacherOnly><TeacherSubjectsScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id" element={<TeacherOnly><SubjectDetailScreen /></TeacherOnly>} />
         <Route path="teacher/quizzes" element={<TeacherOnly><QuizListScreen /></TeacherOnly>} />
         <Route path="teacher/quizzes/create" element={<TeacherOnly><QuizFormScreen /></TeacherOnly>} />
