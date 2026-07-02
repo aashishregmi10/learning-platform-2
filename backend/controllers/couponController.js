@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 
 import Coupon from "../models/Coupon.js";
 import { facetPaginate, searchMatch } from "../utils/paginate.js";
+import { logActivity } from "../services/activityLogService.js";
 
 // @route POST /api/coupons  (admin)
 export const createCoupon = asyncHandler(async (req, res) => {
@@ -11,6 +12,9 @@ export const createCoupon = asyncHandler(async (req, res) => {
     throw new Error("code, discountType and discountValue are required");
   }
   const coupon = await Coupon.create(body);
+
+  await logActivity(req.user, "create_coupon", { targetType: "Coupon", targetId: coupon._id, after: coupon.toObject(), req });
+
   res.status(201).json({ data: coupon, message: "Coupon created" });
 });
 
@@ -33,9 +37,13 @@ export const updateCoupon = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Coupon not found");
   }
+  const before = coupon.toObject();
   Object.assign(coupon, req.body);
   if (req.body.code) coupon.code = req.body.code.toUpperCase();
   await coupon.save();
+
+  await logActivity(req.user, "update_coupon", { targetType: "Coupon", targetId: coupon._id, before, after: coupon.toObject(), req });
+
   res.status(200).json({ data: coupon, message: "Coupon updated" });
 });
 

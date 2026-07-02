@@ -6,11 +6,30 @@ import { useGetSubjectContentQuery } from "../../../store/services/catalogApi";
 import { useLazyPlayContentQuery } from "../../../store/services/contentApi";
 import { useGetSubjectProgressQuery, useSaveProgressMutation } from "../../../store/services/progressApi";
 import { useGetCertificateStatusQuery } from "../../../store/services/certificateApi";
+import { useGetSubjectReviewsQuery } from "../../../store/services/reviewApi";
+import { useGetChapterDoubtsQuery } from "../../../store/services/doubtApi";
 import VideoPlayer from "../../../components/Student/VideoPlayer";
+import RatingSummary from "../../../components/Student/RatingSummary";
+import ReviewList from "../../../components/Student/ReviewList";
+import ReviewForm from "../../../components/Student/ReviewForm";
+import DoubtThread from "../../../components/Student/DoubtThread";
+import DoubtComposer from "../../../components/Student/DoubtComposer";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
 const TYPE_LABEL = { video: "▶ Video", pdf: "📄 PDF", note: "📝 Note", link: "🔗 Link", audio: "🎧 Audio" };
+
+const ChapterDoubts = ({ chapterId }) => {
+  const { data } = useGetChapterDoubtsQuery(chapterId);
+  return (
+    <div style={{ padding: "12px 16px", background: "#fafafa", borderTop: "1px solid #eeeeee" }}>
+      <DoubtThread doubts={data?.data} chapter={chapterId} />
+      <div style={{ marginTop: 8 }}>
+        <DoubtComposer chapter={chapterId} />
+      </div>
+    </div>
+  );
+};
 
 const SubjectViewScreen = () => {
   const { id } = useParams();
@@ -20,6 +39,7 @@ const SubjectViewScreen = () => {
   const [saveProgress] = useSaveProgressMutation();
   const [noteText, setNoteText] = useState(null);
   const [playing, setPlaying] = useState(null); // { contentId, url, lastPosition }
+  const [openDoubts, setOpenDoubts] = useState({});
 
   const catalog = data?.data;
   const entitled = catalog?.subject?.entitled;
@@ -29,6 +49,9 @@ const SubjectViewScreen = () => {
 
   const { data: certStatusRes } = useGetCertificateStatusQuery(id, { skip: !entitled });
   const certStatus = certStatusRes?.data;
+
+  const { data: reviewsRes, refetch: refetchReviews } = useGetSubjectReviewsQuery({ id }, { skip: !catalog });
+  const reviewsData = reviewsRes?.data;
 
   const enroll = () =>
     navigate("/app/student/checkout", {
@@ -116,7 +139,17 @@ const SubjectViewScreen = () => {
         <section key={ch._id} style={{ marginBottom: 20, border: "1px solid #e0e0e0", borderRadius: 10, overflow: "hidden" }}>
           <div style={{ padding: "12px 16px", background: "#f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <strong>{ch.chapterNumber}. {ch.title}</strong>
-            {ch.isFreePreview && <span style={{ fontSize: 12, color: "#1976d3", fontWeight: 600 }}>Free preview</span>}
+            <span style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              {ch.isFreePreview && <span style={{ fontSize: 12, color: "#1976d3", fontWeight: 600 }}>Free preview</span>}
+              {(entitled || ch.isFreePreview) && (
+                <button
+                  onClick={() => setOpenDoubts((s) => ({ ...s, [ch._id]: !s[ch._id] }))}
+                  style={{ background: "none", border: "1px solid #ccc", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12 }}
+                >
+                  💬 Doubts
+                </button>
+              )}
+            </span>
           </div>
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {ch.items.map((item) => {
@@ -158,8 +191,20 @@ const SubjectViewScreen = () => {
               </li>
             ))}
           </ul>
+          {openDoubts[ch._id] && <ChapterDoubts chapterId={ch._id} />}
         </section>
       ))}
+
+      <section style={{ marginTop: 32, marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Reviews</h2>
+        <RatingSummary summary={reviewsData?.summary} />
+        {entitled && (
+          <div style={{ marginTop: 16 }}>
+            <ReviewForm subjectId={id} onDone={refetchReviews} />
+          </div>
+        )}
+        <ReviewList reviews={reviewsData?.reviews} />
+      </section>
 
       {noteText !== null && (
         <div onClick={() => setNoteText(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "grid", placeItems: "center", zIndex: 50 }}>

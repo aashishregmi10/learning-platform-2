@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/User.js";
 import TeacherProfile from "../models/TeacherProfile.js";
+import { logActivity } from "../services/activityLogService.js";
 
 /** Shared $facet paginated list helper. */
 const paginate = async (Model, match, { page, limit, sort = { createdAt: -1 } }) => {
@@ -76,6 +77,13 @@ export const createTeacher = asyncHandler(async (req, res) => {
     approvedAt: new Date(),
   });
 
+  await logActivity(req.user, "create_teacher", {
+    targetType: "User",
+    targetId: user._id,
+    after: { name: user.name, email: user.email },
+    req,
+  });
+
   res.status(201).json({
     data: {
       user: {
@@ -133,6 +141,9 @@ export const deactivateUser = asyncHandler(async (req, res) => {
   user.isActive = false;
   user.forceLogin = true;
   await user.save();
+
+  await logActivity(req.user, "deactivate_user", { targetType: "User", targetId: user._id, req });
+
   res.status(200).json({ data: { user }, message: "User deactivated" });
 });
 
@@ -149,6 +160,8 @@ export const approveTeacher = asyncHandler(async (req, res) => {
   await profile.save();
 
   await User.findByIdAndUpdate(profile.user, { isVerified: true });
+
+  await logActivity(req.user, "approve_teacher", { targetType: "TeacherProfile", targetId: profile._id, req });
 
   res.status(200).json({ data: { teacherProfile: profile }, message: "Teacher approved" });
 });

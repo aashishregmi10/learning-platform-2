@@ -32,6 +32,8 @@ export const baseApi = createApi({
     "Review",
     "Doubt",
     "ActivityLog",
+    "AdminDashboard",
+    "Payout",
   ],
 
   baseQuery: fetchBaseQuery({

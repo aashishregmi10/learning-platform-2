@@ -33,6 +33,11 @@ import certificateRoutes from "./routes/certificateRoutes.js";
 import liveClassRoutes from "./routes/liveClassRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import doubtRoutes from "./routes/doubtRoutes.js";
+import activityLogRoutes from "./routes/activityLogRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import payoutRoutes from "./routes/payoutRoutes.js";
 
 import { scheduleReconciliation } from "./cron/reconcilePayments.js";
 import { scheduleLiveReminders } from "./cron/liveReminders.js";
@@ -68,6 +73,11 @@ app.use("/api/certificates", certificateRoutes);
 app.use("/api/live-classes", liveClassRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/doubts", doubtRoutes);
+app.use("/api/activity-logs", activityLogRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/payouts", payoutRoutes);
 
 // Production: serve the built Vite SPA
 if (env.nodeEnv === "production") {

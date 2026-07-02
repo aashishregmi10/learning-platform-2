@@ -28,6 +28,10 @@ const TeacherProfileSchema = new Schema(
     totalLiveClasses: { type: Number, default: 0 },
     totalStudents: { type: Number, default: 0 },
 
+    // Cached rating (kept in sync from Review — Part 6)
+    ratingAverage: { type: Number, default: 0 },
+    ratingCount: { type: Number, default: 0 },
+
     isApproved: { type: Boolean, default: false },
     approvedBy: { type: Schema.Types.ObjectId, ref: "User" },
     approvedAt: { type: Date },

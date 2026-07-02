@@ -13,6 +13,9 @@ import {
   useStartLiveClassMutation,
   useEndLiveClassMutation,
 } from "../../../../store/services/liveClassApi";
+import { useGetLiveClassDoubtsQuery } from "../../../../store/services/doubtApi";
+import DoubtThread from "../../../../components/Student/DoubtThread";
+import DoubtComposer from "../../../../components/Student/DoubtComposer";
 
 const STATUS_COLOR = { scheduled: "default", live: "success", ended: "info", cancelled: "error" };
 
@@ -25,6 +28,7 @@ const LiveClassDetailScreen = () => {
 
   const { data, isLoading, error } = useGetLiveClassQuery(id);
   const { data: attendanceRes } = useListAttendanceQuery(id, { skip: activeTab !== "attendance" });
+  const { data: doubtsRes } = useGetLiveClassDoubtsQuery(id, { skip: activeTab !== "doubts" });
   const [startLiveClass] = useStartLiveClassMutation();
   const [endLiveClass] = useEndLiveClassMutation();
 
@@ -81,7 +85,7 @@ const LiveClassDetailScreen = () => {
 
           <CustomTabs
             activeTab={activeTab}
-            tabs={[{ label: "Overview", value: "overview" }, { label: "Attendance", value: "attendance" }]}
+            tabs={[{ label: "Overview", value: "overview" }, { label: "Attendance", value: "attendance" }, { label: "Doubts", value: "doubts" }]}
           />
 
           <CustomTabPanel activeTab={activeTab} value="overview">
@@ -109,6 +113,17 @@ const LiveClassDetailScreen = () => {
                   </ListItem>
                 ))}
               </List>
+            </BreadcrumbLayout.Paper>
+          </CustomTabPanel>
+
+          <CustomTabPanel activeTab={activeTab} value="doubts">
+            <BreadcrumbLayout.Paper>
+              <Box sx={{ p: 2 }}>
+                <DoubtThread doubts={doubtsRes?.data} liveClass={id} canResolve />
+                <Box sx={{ mt: 1 }}>
+                  <DoubtComposer liveClass={id} />
+                </Box>
+              </Box>
             </BreadcrumbLayout.Paper>
           </CustomTabPanel>
         </>

@@ -29,7 +29,7 @@ const NotificationBell = () => {
           <NotificationsOutlined />
         </Badge>
       </IconButton>
-      <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)} PaperProps={{ sx: { width: 340 } }}>
+      <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)} slotProps={{ paper: { sx: { width: 340 } } }}>
         {notifications.length === 0 && (
           <MenuItem disabled>
             <Typography variant="body2" sx={{ color: "#6b7280" }}>Nothing here yet.</Typography>

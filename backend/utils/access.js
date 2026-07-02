@@ -35,3 +35,10 @@ export const canAccessChapter = async ({ chapter, studentId }) => {
   if (!studentId) return false;
   return hasActiveEntitlement(studentId, chapter.subject);
 };
+
+/** Live-class access (for join/recording/doubts): free audience or active entitlement. */
+export const canAccessLiveClass = async ({ liveClass, studentId }) => {
+  if (liveClass?.audience === "free") return true;
+  if (!studentId) return false;
+  return hasActiveEntitlement(studentId, liveClass.subject);
+};

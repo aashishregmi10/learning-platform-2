@@ -11,6 +11,7 @@ import {
   decodeEsewaCallback,
 } from "../utils/esewa.js";
 import { fulfillOrder } from "../services/fulfillmentService.js";
+import { logActivity } from "../services/activityLogService.js";
 
 const genInvoiceNumber = () => {
   const d = new Date();
@@ -156,6 +157,14 @@ export const refundOrder = asyncHandler(async (req, res) => {
 
   order.status = "refunded";
   await order.save();
+
+  await logActivity(req.user, "refund_order", {
+    targetType: "Order",
+    targetId: order._id,
+    before: { status: "paid" },
+    after: { status: "refunded", reason },
+    req,
+  });
 
   res.status(200).json({ data: order, message: "Order refunded, access revoked" });
 });

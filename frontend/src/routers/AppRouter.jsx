@@ -9,7 +9,14 @@ import StudentSidebar from "../components/Sidebar/StudentSidebar";
 
 import { AdminOnly, TeacherOnly, StudentOnly } from "./middlewares/RoleOnly";
 
-import AdminDashboardScreen from "../screens/App/Admin/AdminDashboardScreen";
+import AdminDashboardScreen from "../screens/App/Admin/Dashboard/AdminDashboardScreen";
+import UsersMonitorScreen from "../screens/App/Admin/Monitor/UsersMonitorScreen";
+import SubjectsMonitorScreen from "../screens/App/Admin/Monitor/SubjectsMonitorScreen";
+import LiveClassesMonitorScreen from "../screens/App/Admin/Monitor/LiveClassesMonitorScreen";
+import ContentMonitorScreen from "../screens/App/Admin/Monitor/ContentMonitorScreen";
+import ActivityLogScreen from "../screens/App/Admin/ActivityLog/ActivityLogScreen";
+import PayoutListScreen from "../screens/App/Admin/Payout/PayoutListScreen";
+import PayoutDetailScreen from "../screens/App/Admin/Payout/PayoutDetailScreen";
 import TeacherListScreen from "../screens/App/Admin/Teachers/TeacherListScreen";
 import TeacherCreateScreen from "../screens/App/Admin/Teachers/TeacherCreateScreen";
 import ProgramListScreen from "../screens/App/Admin/Catalog/ProgramListScreen";
@@ -62,6 +69,13 @@ const AppRouter = () => {
         <Route path="admin/live-classes/:id" element={<AdminOnly><LiveClassDetailScreen /></AdminOnly>} />
         <Route path="admin/live-classes/:id/edit" element={<AdminOnly><LiveClassFormScreen /></AdminOnly>} />
         <Route path="admin/notifications" element={<AdminOnly><NotificationsScreen /></AdminOnly>} />
+        <Route path="admin/monitor/users" element={<AdminOnly><UsersMonitorScreen /></AdminOnly>} />
+        <Route path="admin/monitor/subjects" element={<AdminOnly><SubjectsMonitorScreen /></AdminOnly>} />
+        <Route path="admin/monitor/live" element={<AdminOnly><LiveClassesMonitorScreen /></AdminOnly>} />
+        <Route path="admin/monitor/content" element={<AdminOnly><ContentMonitorScreen /></AdminOnly>} />
+        <Route path="admin/activity-log" element={<AdminOnly><ActivityLogScreen /></AdminOnly>} />
+        <Route path="admin/payouts" element={<AdminOnly><PayoutListScreen /></AdminOnly>} />
+        <Route path="admin/payouts/:id" element={<AdminOnly><PayoutDetailScreen /></AdminOnly>} />
         {/* Catalog */}
         <Route path="admin/catalog/programs" element={<AdminOnly><ProgramListScreen /></AdminOnly>} />
         <Route path="admin/catalog/programs/create" element={<AdminOnly><ProgramFormScreen /></AdminOnly>} />

@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import {
   ExpandMore, Add, DeleteOutlined, Visibility, VisibilityOff,
-  OndemandVideo, PictureAsPdf, Notes, Link as LinkIcon, QuizOutlined,
+  OndemandVideo, PictureAsPdf, Notes, Link as LinkIcon, QuizOutlined, QuestionAnswerOutlined,
 } from "@mui/icons-material";
 
 import {
@@ -15,8 +15,11 @@ import {
   useDeleteContentMutation,
 } from "../../../../store/services/contentApi";
 import { useUpdateChapterMutation, useDeleteChapterMutation } from "../../../../store/services/chapterApi";
+import { useGetChapterDoubtsQuery } from "../../../../store/services/doubtApi";
 import { useAuth } from "../../../../hooks/useAuth";
 import ContentUploadForm from "./ContentUploadForm";
+import DoubtThread from "../../../../components/Student/DoubtThread";
+import DoubtComposer from "../../../../components/Student/DoubtComposer";
 
 const ICON = { video: <OndemandVideo fontSize="small" />, pdf: <PictureAsPdf fontSize="small" />, note: <Notes fontSize="small" />, link: <LinkIcon fontSize="small" />, audio: <OndemandVideo fontSize="small" /> };
 
@@ -28,6 +31,8 @@ const ChapterPanel = ({ chapter }) => {
   const [deleteChapter] = useDeleteChapterMutation();
   const [deleteContent] = useDeleteContentMutation();
   const [showUpload, setShowUpload] = useState(false);
+  const [showDoubts, setShowDoubts] = useState(false);
+  const { data: doubtsRes } = useGetChapterDoubtsQuery(chapter._id, { skip: !showDoubts });
 
   const contents = data?.data ?? [];
 
@@ -66,6 +71,7 @@ const ChapterPanel = ({ chapter }) => {
               Quizzes{chapter.quizCount ? ` (${chapter.quizCount})` : ""}
             </Button>
             <Button size="small" startIcon={<Add />} onClick={() => setShowUpload((s) => !s)}>Add content</Button>
+            <Button size="small" startIcon={<QuestionAnswerOutlined />} onClick={() => setShowDoubts((s) => !s)}>Doubts</Button>
             <IconButton size="small" color="error" title="Delete chapter" onClick={async () => {
               if (confirm("Delete this chapter?")) {
                 try { await deleteChapter(chapter._id).unwrap(); } catch (e) { toast.error("Failed"); }
@@ -78,6 +84,15 @@ const ChapterPanel = ({ chapter }) => {
 
         {showUpload && (
           <ContentUploadForm chapterId={chapter._id} onDone={() => setShowUpload(false)} />
+        )}
+
+        {showDoubts && (
+          <Box sx={{ mb: 2, p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
+            <DoubtThread doubts={doubtsRes?.data} chapter={chapter._id} canResolve />
+            <Box sx={{ mt: 1 }}>
+              <DoubtComposer chapter={chapter._id} />
+            </Box>
+          </Box>
         )}
 
         <List dense>

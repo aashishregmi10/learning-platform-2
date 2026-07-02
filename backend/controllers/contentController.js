@@ -13,6 +13,7 @@ import {
   signedInlineUrl,
   destroyAsset,
 } from "../config/cloudinary.config.js";
+import { logActivity } from "../services/activityLogService.js";
 
 const toId = (id) =>
   mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
@@ -95,6 +96,13 @@ export const createContent = asyncHandler(async (req, res) => {
     await Subject.findByIdAndUpdate(chapterDoc.subject, { $inc: { [counter]: 1 } });
   }
 
+  await logActivity(req.user, "upload_content", {
+    targetType: "Content",
+    targetId: content._id,
+    after: { title: content.title, type: content.type },
+    req,
+  });
+
   res.status(201).json({ data: content, message: "Content created" });
 });
 
@@ -176,6 +184,7 @@ export const updateContent = asyncHandler(async (req, res) => {
   }
   await assertSubjectWritable(req.user, content.chapter.subject, res);
 
+  const before = { title: content.title, description: content.description, isFree: content.isFree, isPublished: content.isPublished };
   const fields = ["title", "description", "order", "isFree", "isPublished"];
   fields.forEach((f) => {
     if (req.body[f] !== undefined) content[f] = req.body[f];
@@ -184,6 +193,15 @@ export const updateContent = asyncHandler(async (req, res) => {
     content.noteData.content = req.body.noteContent;
   }
   await content.save();
+
+  await logActivity(req.user, "update_content", {
+    targetType: "Content",
+    targetId: content._id,
+    before,
+    after: { title: content.title, description: content.description, isFree: content.isFree, isPublished: content.isPublished },
+    req,
+  });
+
   res.status(200).json({ data: content, message: "Content updated" });
 });
 
@@ -212,5 +230,13 @@ export const deleteContent = asyncHandler(async (req, res) => {
   if (content.storage?.provider === "cloudinary" && content.storage.fileKey) {
     destroyAsset(content.storage.fileKey, content.storage.resourceType).catch(() => {});
   }
+
+  await logActivity(req.user, "delete_content", {
+    targetType: "Content",
+    targetId: content._id,
+    before: { title: content.title, type: content.type },
+    req,
+  });
+
   res.status(200).json({ data: {}, message: "Content deleted" });
 });

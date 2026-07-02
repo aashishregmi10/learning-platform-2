@@ -7,6 +7,7 @@ import { facetPaginate, searchMatch } from "../utils/paginate.js";
 import { assertSubjectWritable } from "../utils/teacherScope.js";
 import { hasActiveEntitlement } from "../utils/access.js";
 import { slugify } from "../utils/slug.js";
+import { logActivity } from "../services/activityLogService.js";
 
 const toId = (id) =>
   mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
@@ -42,6 +43,8 @@ export const createSubject = asyncHandler(async (req, res) => {
   });
 
   await BScYear.findByIdAndUpdate(year, { $inc: { totalSubjects: 1 } });
+
+  await logActivity(req.user, "create_subject", { targetType: "Subject", targetId: subject._id, after: subject.toObject(), req });
 
   res.status(201).json({ data: subject, message: "Subject created" });
 });
@@ -100,6 +103,7 @@ export const updateSubject = asyncHandler(async (req, res) => {
   }
   await assertSubjectWritable(req.user, subject._id, res);
 
+  const before = subject.toObject();
   const fields = ["name", "subjectCode", "description", "category", "displayOrder", "semester", "tags", "thumbnail", "isActive", "metaTitle", "metaDescription"];
   fields.forEach((f) => {
     if (req.body[f] !== undefined) subject[f] = req.body[f];
@@ -107,6 +111,15 @@ export const updateSubject = asyncHandler(async (req, res) => {
   if (req.body.name) subject.slug = slugify(req.body.name);
   if (req.body.pricing) subject.pricing = { ...subject.pricing.toObject(), ...req.body.pricing, currency: "NPR" };
   await subject.save();
+
+  await logActivity(req.user, req.body.pricing ? "update_pricing" : "update_subject", {
+    targetType: "Subject",
+    targetId: subject._id,
+    before,
+    after: subject.toObject(),
+    req,
+  });
+
   res.status(200).json({ data: subject, message: "Subject updated" });
 });
 

@@ -10,6 +10,7 @@ import { hasActiveEntitlement } from "../utils/access.js";
 import { facetPaginate } from "../utils/paginate.js";
 import { mintJoinToken, JOIN_TOKEN_TTL_SECONDS } from "../services/joinTokenService.js";
 import { signedDeliveryUrl } from "../config/cloudinary.config.js";
+import { logActivity } from "../services/activityLogService.js";
 
 const toId = (id) => (mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id);
 
@@ -46,6 +47,14 @@ export const createLiveClass = asyncHandler(async (req, res) => {
     meetingPassword,
   });
   await Subject.findByIdAndUpdate(subject, { $inc: { totalLiveClasses: 1 } });
+
+  await logActivity(req.user, "create_live_class", {
+    targetType: "LiveClass",
+    targetId: liveClass._id,
+    after: { title: liveClass.title, scheduledAt: liveClass.scheduledAt },
+    req,
+  });
+
   res.status(201).json({ data: liveClass, message: "Scheduled" });
 });
 
@@ -107,10 +116,20 @@ export const updateLiveClass = asyncHandler(async (req, res) => {
   }
   await assertSubjectWritable(req.user, liveClass.subject, res);
 
+  const before = { title: liveClass.title, scheduledAt: liveClass.scheduledAt, duration: liveClass.duration };
   ["title", "description", "scheduledAt", "duration", "timezone", "audience", "meetingLink", "meetingPassword"].forEach((f) => {
     if (req.body[f] !== undefined) liveClass[f] = req.body[f];
   });
   await liveClass.save();
+
+  await logActivity(req.user, "update_live_class", {
+    targetType: "LiveClass",
+    targetId: liveClass._id,
+    before,
+    after: { title: liveClass.title, scheduledAt: liveClass.scheduledAt, duration: liveClass.duration },
+    req,
+  });
+
   res.status(200).json({ data: liveClass, message: "Live class updated" });
 });
 
@@ -124,6 +143,9 @@ export const cancelLiveClass = asyncHandler(async (req, res) => {
   await assertSubjectWritable(req.user, liveClass.subject, res);
   liveClass.status = "cancelled";
   await liveClass.save();
+
+  await logActivity(req.user, "cancel_live_class", { targetType: "LiveClass", targetId: liveClass._id, req });
+
   res.status(200).json({ data: liveClass, message: "Live class cancelled" });
 });
 
