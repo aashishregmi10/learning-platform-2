@@ -8,7 +8,7 @@ const TeacherDashboardScreen = () => (
       <div style={{ padding: 24 }}>
         <Typography variant="h6">Teacher Dashboard</Typography>
         <Typography variant="body2" sx={{ color: "#6b7280" }}>
-          Authoring subjects & live classes arrives in Parts 2 and 5.
+          Use the sidebar to manage your assigned subjects' quizzes and live classes.
         </Typography>
       </div>
     </BreadcrumbLayout.Paper>

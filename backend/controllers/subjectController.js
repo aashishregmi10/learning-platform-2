@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import Subject from "../models/Subject.js";
 import BScYear from "../models/BScYear.js";
 import { facetPaginate, searchMatch } from "../utils/paginate.js";
-import { assertSubjectWritable } from "../utils/teacherScope.js";
+import { assertSubjectWritable, getWritableSubjectIds } from "../utils/teacherScope.js";
 import { hasActiveEntitlement } from "../utils/access.js";
 import { slugify } from "../utils/slug.js";
 import { logActivity } from "../services/activityLogService.js";
@@ -52,9 +52,14 @@ export const createSubject = asyncHandler(async (req, res) => {
 // @route GET /api/subjects/list?program=&year=&search=  (admin/teacher)
 export const listSubjects = asyncHandler(async (req, res) => {
   const { page, limit, program, year, search } = req.query;
+
+  const writableIds = await getWritableSubjectIds(req.user);
+  const teacherScope = writableIds ? { _id: { $in: writableIds.map(toId) } } : {};
+
   const { data, totalItems } = await facetPaginate(Subject, {
     match: {
       isDeleted: false,
+      ...teacherScope,
       ...(program && { program: toId(program) }),
       ...(year && { year: toId(year) }),
       ...searchMatch("name", search),

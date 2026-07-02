@@ -14,6 +14,18 @@ export const userApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/users/teachers/${id}/approve`, method: "PATCH" }),
       invalidatesTags: ["Teacher"],
     }),
+    getTeacher: builder.query({
+      query: (id) => `/users/teachers/${id}`,
+      providesTags: ["Teacher"],
+    }),
+    updateTeacherSubjects: builder.mutation({
+      query: ({ id, assignedSubjects }) => ({
+        url: `/users/teachers/${id}/subjects`,
+        method: "PATCH",
+        body: { assignedSubjects },
+      }),
+      invalidatesTags: ["Teacher"],
+    }),
     getUsers: builder.query({
       query: (params) => ({ url: "/users", params }),
       providesTags: ["User"],
@@ -30,6 +42,8 @@ export const {
   useLazyGetTeachersQuery,
   useCreateTeacherMutation,
   useApproveTeacherMutation,
+  useGetTeacherQuery,
+  useUpdateTeacherSubjectsMutation,
   useGetUsersQuery,
   useDeactivateUserMutation,
 } = userApi;

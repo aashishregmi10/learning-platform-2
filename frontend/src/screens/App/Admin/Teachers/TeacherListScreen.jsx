@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { Button } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Button, Chip, IconButton } from "@mui/material";
+import { Add, EditOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
@@ -21,8 +21,22 @@ const TeacherListScreen = () => {
   const columns = [
     { name: "Name", selector: (r) => r.name, sortable: true },
     { name: "Email", selector: (r) => r.email },
-    { name: "Verified", selector: (r) => (r.isVerified ? "Yes" : "No"), width: "120px" },
-    { name: "Active", selector: (r) => (r.isActive ? "Yes" : "No"), width: "120px" },
+    {
+      name: "Assigned",
+      cell: (r) => <Chip size="small" label={`${r.assignedSubjectsCount ?? 0} subject${r.assignedSubjectsCount === 1 ? "" : "s"}`} color={r.assignedSubjectsCount ? "success" : "default"} />,
+      width: "150px",
+    },
+    { name: "Verified", selector: (r) => (r.isVerified ? "Yes" : "No"), width: "100px" },
+    { name: "Active", selector: (r) => (r.isActive ? "Yes" : "No"), width: "90px" },
+    {
+      name: "",
+      cell: (r) => (
+        <IconButton component={Link} to={`/app/admin/teachers/${r._id}`} size="small" title="Manage assignments">
+          <EditOutlined fontSize="small" />
+        </IconButton>
+      ),
+      width: "60px",
+    },
   ];
 
   return (

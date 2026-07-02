@@ -3,6 +3,8 @@ import express from "express";
 import {
   createTeacher,
   listTeachers,
+  getTeacher,
+  updateTeacherSubjects,
   listUsers,
   deactivateUser,
   approveTeacher,
@@ -18,7 +20,9 @@ router.put("/me/password", protect, staffOnly, changePassword);
 
 // admin: teachers
 router.route("/teachers").post(protect, adminOnly, createTeacher).get(protect, adminOnly, listTeachers);
+router.get("/teachers/:id", protect, adminOnly, getTeacher);
 router.patch("/teachers/:id/approve", protect, adminOnly, approveTeacher);
+router.patch("/teachers/:id/subjects", protect, adminOnly, updateTeacherSubjects);
 
 // admin: users
 router.get("/", protect, adminOnly, listUsers);

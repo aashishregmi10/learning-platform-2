@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
-import { Box, Button, Divider, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import { setUser } from "../../store/authSlice";
 import {
@@ -15,6 +16,7 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   const [googleLogin, { isLoading: gLoading }] = useGoogleLoginMutation();
   const [staffLogin, { isLoading: sLoading }] = useStaffLoginMutation();
@@ -92,9 +94,20 @@ const LoginScreen = () => {
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
           <TextField
-            fullWidth size="small" label="Password" type="password" sx={{ mb: 2 }}
+            fullWidth size="small" label="Password" type={showPassword ? "text" : "password"} sx={{ mb: 2 }}
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton size="small" edge="end" onClick={() => setShowPassword((v) => !v)} tabIndex={-1}>
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
           <Button fullWidth type="submit" variant="contained" disabled={sLoading}
             sx={{ bgcolor: "#1976d3", "&:hover": { bgcolor: "#1565c0" } }}>

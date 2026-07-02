@@ -19,6 +19,7 @@ import PayoutListScreen from "../screens/App/Admin/Payout/PayoutListScreen";
 import PayoutDetailScreen from "../screens/App/Admin/Payout/PayoutDetailScreen";
 import TeacherListScreen from "../screens/App/Admin/Teachers/TeacherListScreen";
 import TeacherCreateScreen from "../screens/App/Admin/Teachers/TeacherCreateScreen";
+import TeacherDetailScreen from "../screens/App/Admin/Teachers/TeacherDetailScreen";
 import ProgramListScreen from "../screens/App/Admin/Catalog/ProgramListScreen";
 import ProgramFormScreen from "../screens/App/Admin/Catalog/ProgramFormScreen";
 import YearListScreen from "../screens/App/Admin/Catalog/YearListScreen";
@@ -61,6 +62,7 @@ const AppRouter = () => {
         <Route path="admin" element={<AdminOnly><AdminDashboardScreen /></AdminOnly>} />
         <Route path="admin/teachers" element={<AdminOnly><TeacherListScreen /></AdminOnly>} />
         <Route path="admin/teachers/create" element={<AdminOnly><TeacherCreateScreen /></AdminOnly>} />
+        <Route path="admin/teachers/:id" element={<AdminOnly><TeacherDetailScreen /></AdminOnly>} />
         <Route path="admin/quizzes" element={<AdminOnly><QuizListScreen /></AdminOnly>} />
         <Route path="admin/quizzes/create" element={<AdminOnly><QuizFormScreen /></AdminOnly>} />
         <Route path="admin/quizzes/:id/edit" element={<AdminOnly><QuizFormScreen /></AdminOnly>} />

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/User.js";
 import TeacherProfile from "../models/TeacherProfile.js";
+import Subject from "../models/Subject.js";
 import { logActivity } from "../services/activityLogService.js";
 
 /** Shared $facet paginated list helper. */
@@ -110,8 +111,94 @@ export const listTeachers = asyncHandler(async (req, res) => {
     ...(search && { name: { $regex: new RegExp(search, "i") } }),
   };
 
-  const { data, totalItems } = await paginate(User, match, { page, limit });
-  res.status(200).json({ data, totalItems, message: "OK" });
+  const result = await User.aggregate([
+    { $match: match },
+    {
+      $lookup: {
+        from: "teacherprofiles",
+        localField: "_id",
+        foreignField: "user",
+        as: "teacherProfile",
+      },
+    },
+    { $unwind: { path: "$teacherProfile", preserveNullAndEmptyArrays: true } },
+    {
+      $addFields: {
+        assignedSubjectsCount: { $size: { $ifNull: ["$teacherProfile.assignedSubjects", []] } },
+        isApproved: { $ifNull: ["$teacherProfile.isApproved", false] },
+      },
+    },
+    {
+      $facet: {
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          { $project: { passwordHash: 0, teacherProfile: 0 } },
+        ],
+        count: [{ $count: "total" }],
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    data: result[0]?.data ?? [],
+    totalItems: result[0]?.count?.[0]?.total ?? 0,
+    message: "OK",
+  });
+});
+
+// @route GET /api/users/teachers/:id  (admin)
+export const getTeacher = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ _id: req.params.id, role: "teacher", isDeleted: false }).select(
+    "-passwordHash"
+  );
+  if (!user) {
+    res.status(404);
+    throw new Error("Teacher not found");
+  }
+
+  const teacherProfile = await TeacherProfile.findOne({ user: user._id }).populate(
+    "assignedSubjects",
+    "name program year"
+  );
+
+  res.status(200).json({ data: { user, teacherProfile }, message: "OK" });
+});
+
+// @route PATCH /api/users/teachers/:id/subjects  (admin)
+export const updateTeacherSubjects = asyncHandler(async (req, res) => {
+  const { assignedSubjects = [] } = req.body;
+
+  const user = await User.findOne({ _id: req.params.id, role: "teacher", isDeleted: false });
+  if (!user) {
+    res.status(404);
+    throw new Error("Teacher not found");
+  }
+
+  const validCount = await Subject.countDocuments({
+    _id: { $in: assignedSubjects },
+    isDeleted: false,
+  });
+  if (validCount !== assignedSubjects.length) {
+    res.status(422);
+    throw new Error("One or more subjects are invalid");
+  }
+
+  const profile = await TeacherProfile.findOneAndUpdate(
+    { user: user._id },
+    { assignedSubjects },
+    { new: true, upsert: true }
+  ).populate("assignedSubjects", "name program year");
+
+  await logActivity(req.user, "update_teacher_subjects", {
+    targetType: "TeacherProfile",
+    targetId: profile._id,
+    after: { assignedSubjects },
+    req,
+  });
+
+  res.status(200).json({ data: { teacherProfile: profile }, message: "Assigned subjects updated" });
 });
 
 // @route GET /api/users  (admin)

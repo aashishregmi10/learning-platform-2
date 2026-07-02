@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Box, Button, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, TextField } from "@mui/material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import { useCreateTeacherMutation } from "../../../../store/services/userApi";
+import { useGetSubjectsQuery } from "../../../../store/services/subjectApi";
 
 const empty = {
   name: "",
@@ -17,14 +18,17 @@ const empty = {
 const TeacherCreateScreen = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState(empty);
+  const [assignedSubjects, setAssignedSubjects] = useState([]);
   const [createTeacher, { isLoading }] = useCreateTeacherMutation();
+  const { data: subjectsRes, isLoading: subjectsLoading } = useGetSubjectsQuery({ limit: 500 });
+  const subjectOptions = subjectsRes?.data ?? [];
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createTeacher(form).unwrap();
+      await createTeacher({ ...form, assignedSubjects: assignedSubjects.map((s) => s._id) }).unwrap();
       toast.success("Teacher created");
       navigate("/app/admin/teachers");
     } catch (err) {
@@ -54,6 +58,18 @@ const TeacherCreateScreen = () => {
             <TextField fullWidth required size="small" label="Temp Password" value={form.password} onChange={set("password")} />
             <TextField fullWidth size="small" label="Qualification" value={form.qualification} onChange={set("qualification")} />
             <TextField fullWidth size="small" label="Specialization" value={form.specialization} onChange={set("specialization")} />
+            <Autocomplete
+              multiple
+              sx={{ gridColumn: "1 / -1" }}
+              size="small"
+              options={subjectOptions}
+              loading={subjectsLoading}
+              getOptionLabel={(s) => s.name}
+              isOptionEqualToValue={(a, b) => a._id === b._id}
+              value={assignedSubjects}
+              onChange={(_, value) => setAssignedSubjects(value)}
+              renderInput={(params) => <TextField {...params} label="Assigned subjects" placeholder="Select subjects to teach" />}
+            />
           </Box>
           <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 1 }}>
             <Button onClick={() => navigate(-1)} disabled={isLoading}>Cancel</Button>
