@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { getSubjectIcon } from "../../utils/subjectVisuals";
+import { getSubjectImage, getSubjectIcon } from "../../utils/subjectVisuals";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
@@ -11,9 +11,10 @@ const CATEGORY_COLOR = {
   "Ability Enhancement": "#7b1fa2",
 };
 
-// Richer public-facing subject card — cover with initial glyph, category
-// chip, star rating (when reviewed), price + chapter count.
+// Richer public-facing subject card — cover image, category chip, star
+// rating (when reviewed), price + chapter count.
 const SubjectCard = ({ subject }) => {
+  const image = getSubjectImage(subject.name);
   const Icon = getSubjectIcon(subject.name);
   const chipColor = CATEGORY_COLOR[subject.category] || "#1976d3";
 
@@ -32,9 +33,13 @@ const SubjectCard = ({ subject }) => {
           display: "flex", alignItems: "center", justifyContent: "center", position: "relative",
         }}
       >
-        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon sx={{ fontSize: 30, color: "rgba(255,255,255,0.9)" }} />
-        </div>
+        {image ? (
+          <img src={image} alt={subject.name} style={{ width: "80%", height: "90%", objectFit: "contain" }} />
+        ) : (
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon sx={{ fontSize: 30, color: "rgba(255,255,255,0.9)" }} />
+          </div>
+        )}
         <span
           style={{
             position: "absolute", top: 10, left: 10, background: "rgba(255,255,255,0.9)", color: chipColor,

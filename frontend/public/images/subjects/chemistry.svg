@@ -1,0 +1,35 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="chemLiquid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7ee787"/>
+      <stop offset="100%" stop-color="#2ea043"/>
+    </linearGradient>
+  </defs>
+  <circle cx="200" cy="150" r="130" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- test tube rack (back) -->
+  <g fill="#ffffff" fill-opacity="0.55">
+    <rect x="90" y="120" width="14" height="80" rx="7"/>
+    <rect x="120" y="105" width="14" height="95" rx="7"/>
+    <rect x="270" y="110" width="14" height="90" rx="7"/>
+  </g>
+
+  <!-- main flask -->
+  <g>
+    <path d="M180 70 L180 130 L140 210 Q135 225 150 225 L250 225 Q265 225 260 210 L220 130 L220 70 Z"
+          fill="#ffffff" fill-opacity="0.9"/>
+    <path d="M158 190 L242 190 L260 210 Q265 225 250 225 L150 225 Q135 225 140 210 Z"
+          fill="url(#chemLiquid)"/>
+    <rect x="172" y="58" width="56" height="16" rx="4" fill="#ffffff"/>
+    <!-- bubbles -->
+    <circle cx="190" cy="180" r="6" fill="#ffffff" fill-opacity="0.8"/>
+    <circle cx="212" cy="165" r="4" fill="#ffffff" fill-opacity="0.7"/>
+    <circle cx="200" cy="200" r="5" fill="#ffffff" fill-opacity="0.7"/>
+  </g>
+
+  <!-- floating bubbles -->
+  <circle cx="120" cy="80" r="6" fill="#ffffff" fill-opacity="0.5"/>
+  <circle cx="290" cy="70" r="9" fill="#ffffff" fill-opacity="0.4"/>
+  <circle cx="305" cy="150" r="5" fill="#ffffff" fill-opacity="0.5"/>
+  <circle cx="95" cy="60" r="4" fill="#ffffff" fill-opacity="0.5"/>
+</svg>

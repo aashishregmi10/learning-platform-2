@@ -1,0 +1,34 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="200" cy="150" r="130" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- fox body -->
+  <g fill="#ffffff" fill-opacity="0.92">
+    <path d="M150 200 Q140 130 200 120 Q260 130 250 200 Q250 230 200 235 Q150 230 150 200 Z"/>
+    <!-- ears -->
+    <path d="M158 130 L140 75 L188 118 Z"/>
+    <path d="M242 130 L260 75 L212 118 Z"/>
+    <!-- inner ears -->
+    <path d="M162 122 L152 92 L178 116 Z" fill-opacity="0.5"/>
+    <path d="M238 122 L248 92 L222 116 Z" fill-opacity="0.5"/>
+  </g>
+
+  <!-- muzzle -->
+  <path d="M178 175 Q200 210 222 175 Q210 200 200 200 Q190 200 178 175 Z" fill="#ffffff" fill-opacity="0.55"/>
+  <circle cx="200" cy="182" r="5" fill="#2b3a55"/>
+
+  <!-- eyes -->
+  <circle cx="182" cy="160" r="6" fill="#2b3a55"/>
+  <circle cx="218" cy="160" r="6" fill="#2b3a55"/>
+
+  <!-- tail -->
+  <path d="M250 210 Q310 210 300 260 Q280 245 260 240 Q265 225 250 210 Z" fill="#ffffff" fill-opacity="0.85"/>
+  <circle cx="292" cy="252" r="10" fill="#ffffff" fill-opacity="0.55"/>
+
+  <!-- paw prints accent -->
+  <g fill="#ffffff" fill-opacity="0.4">
+    <circle cx="90" cy="230" r="7"/>
+    <circle cx="105" cy="215" r="5"/>
+    <circle cx="78" cy="215" r="5"/>
+    <circle cx="112" cy="248" r="10"/>
+  </g>
+</svg>

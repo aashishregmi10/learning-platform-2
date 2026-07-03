@@ -1,20 +1,44 @@
 import { StarRounded } from "@mui/icons-material";
 
 import InfoCard from "./InfoCard";
-import { getSubjectIcon } from "../../utils/subjectVisuals";
+import { getSubjectImage, getSubjectIcon } from "../../utils/subjectVisuals";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
+
+const CATEGORY_COLOR = {
+  Core: "#1976d3",
+  Elective: "#2D5A3D",
+  Practical: "#b26a00",
+  "Ability Enhancement": "#7b1fa2",
+};
 
 const SubjectCard = ({ subject }) => {
   const pills = [{ label: subject.category, tone: "solid" }];
   if (subject.entitled) pills.push({ label: "Enrolled", tone: "outline" });
+
+  const image = getSubjectImage(subject.name);
   const Icon = getSubjectIcon(subject.name);
+  const chipColor = CATEGORY_COLOR[subject.category] || "#1976d3";
 
   return (
     <InfoCard
       to={`/app/student/subjects/${subject._id}`}
       pills={pills}
-      icon={<Icon sx={{ fontSize: 30, color: "#8b95a5" }} />}
+      icon={
+        image ? (
+          <div
+            style={{
+              width: "100%", height: "100%", borderRadius: 10,
+              background: `linear-gradient(135deg, ${chipColor}, #10365e)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <img src={image} alt={subject.name} style={{ width: "70%", height: "80%", objectFit: "contain" }} />
+          </div>
+        ) : (
+          <Icon sx={{ fontSize: 30, color: "#8b95a5" }} />
+        )
+      }
       title={subject.name}
       meta={
         subject.ratingCount > 0 ? (

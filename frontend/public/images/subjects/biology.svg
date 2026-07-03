@@ -1,0 +1,29 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="200" cy="150" r="130" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- microscope base -->
+  <g fill="#ffffff" fill-opacity="0.9">
+    <rect x="140" y="215" width="120" height="14" rx="6"/>
+    <rect x="188" y="150" width="16" height="70" rx="4"/>
+    <path d="M170 150 Q170 110 220 100 L240 100 Q252 100 252 112 L252 122 Q252 132 240 132 L222 132 Q200 132 200 155 Z"/>
+    <rect x="206" y="80" width="34" height="24" rx="4"/>
+    <rect x="212" y="60" width="10" height="24" rx="3"/>
+    <circle cx="180" cy="150" r="14" fill="none" stroke="#ffffff" stroke-width="6"/>
+    <rect x="150" y="205" width="60" height="10" rx="3" fill-opacity="0.7"/>
+  </g>
+
+  <!-- DNA helix accent -->
+  <g stroke="#ffffff" stroke-opacity="0.6" stroke-width="4" fill="none">
+    <path d="M300 70 C280 100 320 120 300 150 C280 180 320 200 300 230"/>
+    <path d="M330 70 C350 100 310 120 330 150 C350 180 310 200 330 230"/>
+    <line x1="304" y1="80" x2="326" y2="80"/>
+    <line x1="298" y1="110" x2="332" y2="110"/>
+    <line x1="304" y1="150" x2="326" y2="150"/>
+    <line x1="298" y1="180" x2="332" y2="180"/>
+    <line x1="304" y1="220" x2="326" y2="220"/>
+  </g>
+
+  <!-- leaf accent -->
+  <path d="M85 90 Q60 130 90 175 Q120 130 85 90 Z" fill="#7ee787" fill-opacity="0.7"/>
+  <line x1="85" y1="95" x2="85" y2="170" stroke="#2ea043" stroke-width="3" stroke-opacity="0.6"/>
+</svg>
