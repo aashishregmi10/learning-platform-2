@@ -18,6 +18,10 @@ export const subjectApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/subjects", method: "POST", body }),
       invalidatesTags: ["Subject", "Year"],
     }),
+    // accepts a FormData (file upload) — RTK Query passes it through.
+    uploadSubjectThumbnail: builder.mutation({
+      query: (formData) => ({ url: "/subjects/upload-thumbnail", method: "POST", body: formData }),
+    }),
     updateSubject: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/subjects/${id}`, method: "PUT", body }),
       invalidatesTags: ["Subject"],
@@ -34,6 +38,7 @@ export const {
   useGetSubjectQuery,
   useGetSubjectBySlugQuery,
   useCreateSubjectMutation,
+  useUploadSubjectThumbnailMutation,
   useUpdateSubjectMutation,
   useDeleteSubjectMutation,
 } = subjectApi;

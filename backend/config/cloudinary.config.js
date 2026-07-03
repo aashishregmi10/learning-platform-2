@@ -17,6 +17,20 @@ export const uploadBuffer = (buffer, { resourceType = "auto", folder = FOLDER } 
   });
 
 /**
+ * Upload a buffer as a PUBLIC asset — for cover images that must render in a
+ * plain <img src> for anonymous visitors (e.g. subject thumbnails), unlike
+ * paid media which stays behind signed URLs via uploadBuffer above.
+ */
+export const uploadPublicImage = (buffer, { folder = `${FOLDER}/subjects` } = {}) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "image", folder },
+      (error, result) => (error ? reject(error) : resolve(result))
+    );
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+
+/**
  * Mint a signed, short-TTL delivery URL for an authenticated asset.
  * The signature can't be forged, so paid media isn't publicly guessable.
  */

@@ -158,10 +158,11 @@ export const getTeacher = asyncHandler(async (req, res) => {
     throw new Error("Teacher not found");
   }
 
-  const teacherProfile = await TeacherProfile.findOne({ user: user._id }).populate(
-    "assignedSubjects",
-    "name program year"
-  );
+  const teacherProfile = await TeacherProfile.findOne({ user: user._id }).populate({
+    path: "assignedSubjects",
+    select: "name program year",
+    populate: { path: "year", select: "yearName yearNumber" },
+  });
 
   res.status(200).json({ data: { user, teacherProfile }, message: "OK" });
 });
@@ -189,7 +190,11 @@ export const updateTeacherSubjects = asyncHandler(async (req, res) => {
     { user: user._id },
     { assignedSubjects },
     { new: true, upsert: true }
-  ).populate("assignedSubjects", "name program year");
+  ).populate({
+    path: "assignedSubjects",
+    select: "name program year",
+    populate: { path: "year", select: "yearName yearNumber" },
+  });
 
   await logActivity(req.user, "update_teacher_subjects", {
     targetType: "TeacherProfile",

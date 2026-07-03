@@ -8,13 +8,14 @@ import { assertSubjectWritable, getWritableSubjectIds } from "../utils/teacherSc
 import { hasActiveEntitlement } from "../utils/access.js";
 import { slugify } from "../utils/slug.js";
 import { logActivity } from "../services/activityLogService.js";
+import { uploadPublicImage } from "../config/cloudinary.config.js";
 
 const toId = (id) =>
   mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
 
 // @route POST /api/subjects  (admin only — creating new subjects is admin work)
 export const createSubject = asyncHandler(async (req, res) => {
-  const { year, name, subjectCode, description, category, pricing, tags, semester, displayOrder } =
+  const { year, name, subjectCode, description, category, pricing, tags, semester, displayOrder, thumbnail } =
     req.body;
 
   if (!year || !name || !pricing?.originalPrice || !pricing?.discountedPrice) {
@@ -40,6 +41,7 @@ export const createSubject = asyncHandler(async (req, res) => {
     displayOrder,
     pricing: { ...pricing, currency: "NPR" },
     tags,
+    thumbnail,
   });
 
   await BScYear.findByIdAndUpdate(year, { $inc: { totalSubjects: 1 } });
@@ -47,6 +49,18 @@ export const createSubject = asyncHandler(async (req, res) => {
   await logActivity(req.user, "create_subject", { targetType: "Subject", targetId: subject._id, after: subject.toObject(), req });
 
   res.status(201).json({ data: subject, message: "Subject created" });
+});
+
+// @route POST /api/subjects/upload-thumbnail  (admin/teacher)
+// Standalone (not /:id/thumbnail) so it works during subject creation,
+// before an id exists — the returned URL is just carried in form state.
+export const uploadSubjectThumbnail = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    res.status(422);
+    throw new Error("No file uploaded");
+  }
+  const result = await uploadPublicImage(req.file.buffer);
+  res.status(200).json({ data: { url: result.secure_url }, message: "Uploaded" });
 });
 
 // @route GET /api/subjects/list?program=&year=&search=  (admin/teacher)
@@ -64,6 +78,21 @@ export const listSubjects = asyncHandler(async (req, res) => {
       ...(year && { year: toId(year) }),
       ...searchMatch("name", search),
     },
+    // Populate year so every screen listing/picking subjects (admin list,
+    // teacher assignment, teacher's own subjects, live-class picker) can
+    // disambiguate same-named subjects across academic years.
+    pipeline: [
+      {
+        $lookup: {
+          from: "bscyears",
+          localField: "year",
+          foreignField: "_id",
+          as: "year",
+          pipeline: [{ $project: { yearNumber: 1, yearName: 1 } }],
+        },
+      },
+      { $unwind: { path: "$year", preserveNullAndEmptyArrays: true } },
+    ],
     sort: { displayOrder: 1, createdAt: -1 },
     page,
     limit,

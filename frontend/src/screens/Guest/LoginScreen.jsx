@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
@@ -47,12 +47,12 @@ const LoginScreen = () => {
     }
   };
 
-  const devLoginStudent = async () => {
+  const devLogin = async (email) => {
     try {
       const res = await fetch("/api/auth/dev-login", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: "student@bsc.np" }),
+        body: JSON.stringify({ email }),
       }).then((r) => r.json());
       if (!res.data?.user) throw new Error(res.message);
       onSuccess(res.data.user);
@@ -64,7 +64,8 @@ const LoginScreen = () => {
   return (
     <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: "#f5f5f5", p: 2 }}>
       <Paper variant="outlined" sx={{ p: 4, width: 380, maxWidth: "100%" }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: "#1976d3", mb: 0.5 }}>
+        <Link to="/" style={{ color: "var(--primary)", fontSize: 14, textDecoration: "none" }}>← Back to home</Link>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: "#1976d3", mb: 0.5, mt: 1.5 }}>
           B.Sc Nepal
         </Typography>
         <Typography variant="body2" sx={{ color: "#6b7280", mb: 3 }}>
@@ -118,9 +119,14 @@ const LoginScreen = () => {
         {import.meta.env.DEV && (
           <>
             <Divider sx={{ my: 2 }}>dev</Divider>
-            <Button fullWidth size="small" variant="outlined" onClick={devLoginStudent}>
-              Dev: login as seed student
-            </Button>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Button fullWidth size="small" variant="outlined" onClick={() => devLogin("student@bsc.np")}>
+                Dev: login as Ram (no purchases)
+              </Button>
+              <Button fullWidth size="small" variant="outlined" onClick={() => devLogin("student2@bsc.np")}>
+                Dev: login as Priya (enrolled in 1st Year)
+              </Button>
+            </Box>
           </>
         )}
       </Paper>

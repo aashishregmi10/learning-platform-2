@@ -82,7 +82,7 @@ const LiveClassFormScreen = () => {
             <InputLabel>Subject</InputLabel>
             <Select label="Subject" value={form.subject} onChange={set("subject")}>
               {(subjectsRes?.data ?? []).map((s) => (
-                <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>
+                <MenuItem key={s._id} value={s._id}>{s.name} — {s.year?.yearName}</MenuItem>
               ))}
             </Select>
           </FormControl>

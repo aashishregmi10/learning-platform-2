@@ -73,7 +73,7 @@ const TeacherDetailScreen = () => {
                 size="small"
                 options={subjectOptions}
                 loading={subjectsLoading}
-                getOptionLabel={(s) => s.name}
+                getOptionLabel={(s) => `${s.name} — ${s.year?.yearName ?? ""}`}
                 isOptionEqualToValue={(a, b) => a._id === b._id}
                 value={assignedSubjects}
                 onChange={(_, value) => setAssignedSubjects(value)}

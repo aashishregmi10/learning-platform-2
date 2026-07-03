@@ -25,6 +25,7 @@ import Doubt from "../models/Doubt.js";
 import Review from "../models/Review.js";
 import Progress from "../models/Progress.js";
 import Subscription from "../models/Subscription.js";
+import Order from "../models/Order.js";
 import Coupon from "../models/Coupon.js";
 import { slugify } from "../utils/slug.js";
 
@@ -47,8 +48,15 @@ const teacher = await upsert(User, { email: "teacher@bsc.np" }, {
   name: "Dr. Sita Sharma", passwordHash: teacherHash, authProvider: "password", role: "teacher", isVerified: true,
 });
 
+// Two mock students since Google OAuth isn't configured in this dev env:
+// Ram has no purchases (tests empty-state UX), Priya has an active 1st Year
+// subscription (tests the "student who bought something" experience).
 const student = await upsert(User, { email: "student@bsc.np" }, {
   name: "Ram Student", googleId: "seed-student-google", authProvider: "google", role: "student", isVerified: true,
+});
+
+const student2 = await upsert(User, { email: "student2@bsc.np" }, {
+  name: "Priya Student", googleId: "seed-student2-google", authProvider: "google", role: "student", isVerified: true,
 });
 
 // --- catalog: wipe everything downstream of Subject/Chapter, then rebuild ---
@@ -86,6 +94,7 @@ const SUBJECT_TEMPLATE = [
 ];
 
 const subjectsByYear = []; // subjectsByYear[0] = year1's 4 subjects, etc.
+const years = []; // years[0] = 1st Year BScYear doc, etc.
 
 for (let yearNumber = 1; yearNumber <= 4; yearNumber++) {
   const bundleOriginal = 6000 + (yearNumber - 1) * 800;
@@ -95,6 +104,7 @@ for (let yearNumber = 1; yearNumber <= 4; yearNumber++) {
     yearName: YEAR_NAMES[yearNumber - 1], isActive: true,
     bundlePrice: { originalPrice: bundleOriginal, discountedPrice: bundleDiscounted, currency: "NPR" },
   });
+  years.push(year);
 
   const subjectOriginal = 1800 + (yearNumber - 1) * 200;
   const subjectDiscounted = 1450 + (yearNumber - 1) * 150;
@@ -132,6 +142,58 @@ await StudentProfile.findOneAndUpdate(
   { user: student._id },
   { user: student._id, program: program._id, currentYear: "1st Year" },
   { upsert: true }
+);
+await StudentProfile.findOneAndUpdate(
+  { user: student2._id },
+  { user: student2._id, program: program._id, currentYear: "1st Year" },
+  { upsert: true }
+);
+
+// give Priya a real paid 1st Year bundle: an Order, an active Subscription,
+// and one Entitlement per 1st-Year subject (this is what actually unlocks
+// content — see backend/utils/access.js hasActiveEntitlement).
+const year1 = years[0];
+const year1Subjects = subjectsByYear[0];
+const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+await Order.deleteMany({ user: student2._id }); // re-seed cleanly each run
+const priyaOrder = await Order.create({
+  user: student2._id,
+  items: [{
+    itemType: "year", year: year1._id,
+    title: `${year1.yearName} bundle`,
+    originalPrice: year1.bundlePrice.originalPrice,
+    discountedPrice: year1.bundlePrice.discountedPrice,
+  }],
+  subtotal: year1.bundlePrice.discountedPrice,
+  totalAmount: year1.bundlePrice.discountedPrice,
+  status: "paid",
+  payment: { gateway: "esewa", paidAt: new Date() },
+  fulfilledAt: new Date(),
+});
+
+const priyaSubscription = await Subscription.create({
+  user: student2._id,
+  order: priyaOrder._id,
+  type: "year",
+  year: year1._id,
+  price: { amount: year1.bundlePrice.discountedPrice, originalAmount: year1.bundlePrice.originalPrice },
+  expiresAt,
+  status: "active",
+  payment: { gateway: "esewa", paidAt: new Date() },
+});
+
+await Promise.all(
+  year1Subjects.map((subj) =>
+    Entitlement.create({
+      student: student2._id,
+      subject: subj._id,
+      source: "year",
+      subscription: priyaSubscription._id,
+      expiresAt,
+      isActive: true,
+    })
+  )
 );
 
 // --- chapters + content for every subject ---
@@ -209,7 +271,8 @@ console.log(`
 Login credentials
   Admin    : admin@bsc.np    / Admin@123      (staff login)
   Teacher  : teacher@bsc.np  / Teach@123      (staff login)
-  Student  : student@bsc.np  (Google-only; use the "Dev login as student" button in dev)
+  Student  : student@bsc.np  (Ram, no purchases — Google-only, use the dev-login buttons on /login)
+  Student2 : student2@bsc.np (Priya, active 1st Year subscription — same dev-login flow)
 
 Catalog
   Program  : B.Sc (active)

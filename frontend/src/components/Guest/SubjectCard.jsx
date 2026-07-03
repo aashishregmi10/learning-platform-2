@@ -14,7 +14,8 @@ const CATEGORY_COLOR = {
 // Richer public-facing subject card — cover image, category chip, star
 // rating (when reviewed), price + chapter count.
 const SubjectCard = ({ subject }) => {
-  const image = getSubjectImage(subject.name);
+  const uploadedImage = subject.thumbnail;
+  const image = uploadedImage || getSubjectImage(subject.name);
   const Icon = getSubjectIcon(subject.name);
   const chipColor = CATEGORY_COLOR[subject.category] || "#1976d3";
 
@@ -34,7 +35,13 @@ const SubjectCard = ({ subject }) => {
         }}
       >
         {image ? (
-          <img src={image} alt={subject.name} style={{ width: "80%", height: "90%", objectFit: "contain" }} />
+          <img
+            src={image}
+            alt={subject.name}
+            style={uploadedImage
+              ? { width: "100%", height: "100%", objectFit: "cover" }
+              : { width: "80%", height: "90%", objectFit: "contain" }}
+          />
         ) : (
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon sx={{ fontSize: 30, color: "rgba(255,255,255,0.9)" }} />

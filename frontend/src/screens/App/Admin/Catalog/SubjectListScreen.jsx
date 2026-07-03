@@ -25,6 +25,7 @@ const SubjectListScreen = () => {
     { name: "Name", selector: (r) => r.name, grow: 2, cell: (r) => (
       <Link to={`/app/admin/catalog/subjects/${r._id}`} style={{ color: "#1976d3" }}>{r.name}</Link>
     ) },
+    { name: "Year", selector: (r) => r.year?.yearName || "—", width: "110px" },
     { name: "Code", selector: (r) => r.subjectCode || "—", width: "110px" },
     { name: "Price", selector: (r) => money(r.pricing?.discountedPrice), width: "130px" },
     { name: "Chapters", selector: (r) => r.totalChapters, width: "100px" },

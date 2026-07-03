@@ -16,7 +16,8 @@ const SubjectCard = ({ subject }) => {
   const pills = [{ label: subject.category, tone: "solid" }];
   if (subject.entitled) pills.push({ label: "Enrolled", tone: "outline" });
 
-  const image = getSubjectImage(subject.name);
+  const uploadedImage = subject.thumbnail;
+  const image = uploadedImage || getSubjectImage(subject.name);
   const Icon = getSubjectIcon(subject.name);
   const chipColor = CATEGORY_COLOR[subject.category] || "#1976d3";
 
@@ -26,15 +27,19 @@ const SubjectCard = ({ subject }) => {
       pills={pills}
       icon={
         image ? (
-          <div
-            style={{
-              width: "100%", height: "100%", borderRadius: 10,
-              background: `linear-gradient(135deg, ${chipColor}, #10365e)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}
-          >
-            <img src={image} alt={subject.name} style={{ width: "70%", height: "80%", objectFit: "contain" }} />
-          </div>
+          uploadedImage ? (
+            <img src={image} alt={subject.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }} />
+          ) : (
+            <div
+              style={{
+                width: "100%", height: "100%", borderRadius: 10,
+                background: `linear-gradient(135deg, ${chipColor}, #10365e)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <img src={image} alt={subject.name} style={{ width: "70%", height: "80%", objectFit: "contain" }} />
+            </div>
+          )
         ) : (
           <Icon sx={{ fontSize: 30, color: "#8b95a5" }} />
         )

@@ -27,6 +27,7 @@ const TeacherSubjectsScreen = () => {
         </Link>
       ),
     },
+    { name: "Year", selector: (r) => r.year?.yearName || "—", width: "110px" },
     { name: "Code", selector: (r) => r.subjectCode || "—", width: "120px" },
     { name: "Chapters", selector: (r) => r.totalChapters ?? 0, width: "110px" },
     {
