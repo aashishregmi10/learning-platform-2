@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Skeleton } from "@mui/material";
 
 import { useGetQuizQuery, useSubmitQuizMutation } from "../../../store/services/quizApi";
 import QuizRunner from "../../../components/Student/QuizRunner";
@@ -28,7 +29,15 @@ const QuizScreen = () => {
     refetch();
   };
 
-  if (isLoading) return <div style={{ padding: 24, color: "#6b7280" }}>Loading…</div>;
+  if (isLoading) {
+    return (
+      <div style={{ maxWidth: 700, margin: "0 auto" }}>
+        <Skeleton variant="text" width={120} height={24} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width={300} height={40} sx={{ mb: 2 }} />
+        <Skeleton variant="rounded" height={280} sx={{ borderRadius: "12px" }} />
+      </div>
+    );
+  }
   if (error) return <div style={{ padding: 24, color: "#b3261e" }}>{error?.data?.message || "This quiz isn't available."}</div>;
   if (!quiz) return null;
 

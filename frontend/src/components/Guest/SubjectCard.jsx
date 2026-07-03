@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+import { getSubjectIcon } from "../../utils/subjectVisuals";
+
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
 const CATEGORY_COLOR = {
@@ -12,7 +14,7 @@ const CATEGORY_COLOR = {
 // Richer public-facing subject card — cover with initial glyph, category
 // chip, star rating (when reviewed), price + chapter count.
 const SubjectCard = ({ subject }) => {
-  const initial = subject.name?.[0] ?? "?";
+  const Icon = getSubjectIcon(subject.name);
   const chipColor = CATEGORY_COLOR[subject.category] || "#1976d3";
 
   return (
@@ -30,7 +32,9 @@ const SubjectCard = ({ subject }) => {
           display: "flex", alignItems: "center", justifyContent: "center", position: "relative",
         }}
       >
-        <span style={{ color: "rgba(255,255,255,0.25)", fontSize: 56, fontWeight: 800, lineHeight: 1 }}>{initial}</span>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon sx={{ fontSize: 30, color: "rgba(255,255,255,0.9)" }} />
+        </div>
         <span
           style={{
             position: "absolute", top: 10, left: 10, background: "rgba(255,255,255,0.9)", color: chipColor,

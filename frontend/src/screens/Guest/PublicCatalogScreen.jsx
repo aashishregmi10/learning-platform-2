@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { Skeleton } from "@mui/material";
 
 import { useGetPublicCatalogQuery } from "../../store/services/catalogApi";
 import SubjectCard from "../../components/Guest/SubjectCard";
@@ -10,7 +11,20 @@ const PublicCatalogScreen = () => {
   const { data, isLoading, error } = useGetPublicCatalogQuery(programSlug);
   const catalog = data?.data;
 
-  if (isLoading) return <div style={{ color: "var(--muted)" }}>Loading…</div>;
+  if (isLoading) {
+    return (
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <Skeleton variant="text" width={100} height={24} sx={{ mb: 2 }} />
+        <Skeleton variant="text" width={280} height={44} />
+        <Skeleton variant="text" width={420} height={24} sx={{ mb: 3 }} />
+        <div style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))" }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={230} sx={{ borderRadius: "14px" }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (error || !catalog) return <div style={{ padding: 24 }}>Program not found.</div>;
 
   return (

@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Skeleton } from "@mui/material";
 
 import { useGetSubjectBySlugQuery } from "../../store/services/subjectApi";
 import { useGetSubjectContentQuery } from "../../store/services/catalogApi";
@@ -40,7 +41,19 @@ const PublicSubjectScreen = () => {
     }
   };
 
-  if (loadingSubject) return <div style={{ color: "#6b7280" }}>Loading…</div>;
+  if (loadingSubject) {
+    return (
+      <div style={{ maxWidth: 820, margin: "0 auto" }}>
+        <Skeleton variant="text" width={140} height={24} sx={{ mb: 2 }} />
+        <Skeleton variant="rounded" height={130} sx={{ borderRadius: "16px", mb: 3 }} />
+        <Skeleton variant="rounded" height={56} sx={{ borderRadius: "10px", mb: 3 }} />
+        <Skeleton variant="text" width={140} height={28} sx={{ mb: 1 }} />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" height={90} sx={{ borderRadius: "10px", mb: 2 }} />
+        ))}
+      </div>
+    );
+  }
   if (error || !subject) return <div style={{ padding: 24 }}>Subject not found.</div>;
 
   return (
@@ -75,7 +88,9 @@ const PublicSubjectScreen = () => {
       )}
 
       <h2 style={{ fontSize: 18, marginBottom: 12 }}>What's inside</h2>
-      {loadingContent && <p style={{ color: "#6b7280" }}>Loading syllabus…</p>}
+      {loadingContent && Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} variant="rounded" height={90} sx={{ borderRadius: "10px", mb: 2 }} />
+      ))}
       {chapters.map((ch) => (
         <section key={ch._id} style={{ marginBottom: 20, border: "1px solid #e0e0e0", borderRadius: 10, overflow: "hidden" }}>
           <div style={{ padding: "12px 16px", background: "#f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

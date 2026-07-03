@@ -66,10 +66,16 @@ await Promise.all([
 await Chapter.deleteMany({});
 await Subject.deleteMany({});
 
-const program = await upsert(Program, { slug: "bsc-csit" }, {
-  name: "B.Sc CSIT", code: "CSIT", durationYears: 4, isActive: true,
-  description: "Bachelor of Science in Computer Science & Information Technology (TU).",
-});
+// findOneAndUpdate (not the create-only `upsert` helper) so re-running the
+// seed after a name/description change actually updates the existing doc.
+const program = await Program.findOneAndUpdate(
+  { slug: "bsc-csit" },
+  {
+    slug: "bsc-csit", name: "B.Sc", code: "", durationYears: 4, isActive: true,
+    description: "Bachelor of Science (TU) — a general science program covering Chemistry, Biology, Physics and Zoology across all four years.",
+  },
+  { upsert: true, new: true, setDefaultsOnInsert: true }
+);
 
 const YEAR_NAMES = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SUBJECT_TEMPLATE = [
@@ -206,7 +212,7 @@ Login credentials
   Student  : student@bsc.np  (Google-only; use the "Dev login as student" button in dev)
 
 Catalog
-  Program  : B.Sc CSIT (active)
+  Program  : B.Sc (active)
   Years    : 1st-4th Year, each with a bundle
   Subjects : Chemistry, Biology, Physics, Zoology - in every year (16 total)
   Chapters : 3 per subject (first = free preview) with intro notes + a demo video

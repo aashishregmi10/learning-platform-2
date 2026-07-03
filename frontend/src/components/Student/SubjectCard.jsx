@@ -1,18 +1,20 @@
-import { MenuBookOutlined, StarRounded } from "@mui/icons-material";
+import { StarRounded } from "@mui/icons-material";
 
 import InfoCard from "./InfoCard";
+import { getSubjectIcon } from "../../utils/subjectVisuals";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
 const SubjectCard = ({ subject }) => {
   const pills = [{ label: subject.category, tone: "solid" }];
   if (subject.entitled) pills.push({ label: "Enrolled", tone: "outline" });
+  const Icon = getSubjectIcon(subject.name);
 
   return (
     <InfoCard
       to={`/app/student/subjects/${subject._id}`}
       pills={pills}
-      icon={<MenuBookOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} />}
+      icon={<Icon sx={{ fontSize: 30, color: "#8b95a5" }} />}
       title={subject.name}
       meta={
         subject.ratingCount > 0 ? (

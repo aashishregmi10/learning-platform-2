@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@mui/material";
 
 import { useGetMyNotificationsQuery, useMarkNotificationReadMutation } from "../../store/services/notificationApi";
 
@@ -15,7 +16,15 @@ const NotificationCenter = () => {
     if (n.actionUrl) navigate(n.actionUrl);
   };
 
-  if (isLoading) return <div style={{ color: "#8C7B6B" }}>Loading…</div>;
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" height={64} sx={{ borderRadius: "10px" }} />
+        ))}
+      </div>
+    );
+  }
   if (notifications.length === 0) {
     return <p style={{ color: "#8C7B6B" }}>Nothing here yet — let's fix that.</p>;
   }

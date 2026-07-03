@@ -1,3 +1,4 @@
+import { Skeleton } from "@mui/material";
 import { VideocamOutlined } from "@mui/icons-material";
 
 import { useGetUpcomingLiveClassesQuery } from "../../store/services/liveClassApi";
@@ -12,7 +13,15 @@ const UpcomingClasses = () => {
   const { data, isLoading } = useGetUpcomingLiveClassesQuery();
   const classes = data?.data ?? [];
 
-  if (isLoading) return <div style={{ color: "var(--muted)" }}>Loading…</div>;
+  if (isLoading) {
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 380px))", gap: 18 }}>
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" height={220} sx={{ borderRadius: "16px" }} />
+        ))}
+      </div>
+    );
+  }
   if (classes.length === 0) {
     return <EmptyState icon={<VideocamOutlined fontSize="inherit" />} title="Nothing scheduled yet" subtitle="Check back soon for upcoming sessions." />;
   }

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Skeleton } from "@mui/material";
 import {
   OndemandVideoOutlined, VideocamOutlined, QuizOutlined, PictureAsPdfOutlined,
   WorkspacePremiumOutlined, GroupsOutlined,
@@ -42,7 +43,24 @@ const HomeScreen = () => {
   const totalSubjects = catalog?.years.reduce((sum, y) => sum + y.subjects.length, 0) ?? 0;
   const totalChapters = catalog?.years.reduce((sum, y) => sum + y.subjects.reduce((s, sub) => s + (sub.totalChapters || 0), 0), 0) ?? 0;
 
-  if (loadingPrograms) return <div style={{ color: "var(--muted)" }}>Loading…</div>;
+  if (loadingPrograms) {
+    return (
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <Skeleton variant="rounded" height={280} sx={{ borderRadius: "20px", mb: 4 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 40 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={110} sx={{ borderRadius: "14px" }} />
+          ))}
+        </div>
+        <Skeleton variant="text" width={160} height={32} sx={{ mb: 2 }} />
+        <div style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))" }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={230} sx={{ borderRadius: "14px" }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (!primaryProgram) {
     return (
@@ -110,7 +128,13 @@ const HomeScreen = () => {
           <h2 style={{ margin: "4px 0 0", fontSize: 26 }}>{primaryProgram.name} — Year by Year</h2>
         </div>
 
-        {loadingCatalog && <p style={{ color: "var(--muted)" }}>Loading catalog…</p>}
+        {loadingCatalog && (
+          <div style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))" }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} variant="rounded" height={230} sx={{ borderRadius: "14px" }} />
+            ))}
+          </div>
+        )}
         {catalog?.years.length === 0 && <p style={{ color: "var(--muted)" }}>No years published yet — check back soon.</p>}
 
         {catalog?.years.map((year) => (
