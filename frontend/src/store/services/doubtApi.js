@@ -10,6 +10,14 @@ export const doubtApi = baseApi.injectEndpoints({
       query: (liveClassId) => `/doubts/live-class/${liveClassId}`,
       providesTags: ["Doubt"],
     }),
+    getSubjectDoubts: builder.query({
+      query: (subjectId) => `/doubts/subject/${subjectId}`,
+      providesTags: ["Doubt"],
+    }),
+    getMyDoubts: builder.query({
+      query: () => "/doubts/mine",
+      providesTags: ["Doubt"],
+    }),
     createDoubt: builder.mutation({
       query: (body) => ({ url: "/doubts", method: "POST", body }),
       invalidatesTags: ["Doubt"],
@@ -28,6 +36,8 @@ export const doubtApi = baseApi.injectEndpoints({
 export const {
   useGetChapterDoubtsQuery,
   useGetLiveClassDoubtsQuery,
+  useGetSubjectDoubtsQuery,
+  useGetMyDoubtsQuery,
   useCreateDoubtMutation,
   useResolveDoubtMutation,
   useUpvoteDoubtMutation,

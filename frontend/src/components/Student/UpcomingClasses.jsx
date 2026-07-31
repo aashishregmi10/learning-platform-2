@@ -1,6 +1,7 @@
 import { Skeleton } from "@mui/material";
 import { VideocamOutlined } from "@mui/icons-material";
 
+import { tokens } from "../../theme";
 import { useGetUpcomingLiveClassesQuery } from "../../store/services/liveClassApi";
 import LiveJoinButton from "./LiveJoinButton";
 import InfoCard from "./InfoCard";
@@ -32,10 +33,12 @@ const UpcomingClasses = () => {
         <InfoCard
           key={c._id}
           pills={[
-            { label: c.subject?.name, tone: "outline" },
-            ...(c.status === "live" ? [{ label: "● LIVE", tone: "solid", color: "#c62828" }] : []),
+            // Subject name is descriptive — grey. Only the live state is coloured,
+            // and it's success everywhere now (it used to be red only here).
+            { label: c.subject?.name },
+            ...(c.status === "live" ? [{ label: "● LIVE", role: "success" }] : []),
           ]}
-          icon={<VideocamOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} />}
+          icon={<VideocamOutlined sx={{ fontSize: 30, color: tokens.faint }} />}
           title={c.title}
           meta={<span style={{ fontSize: 13, color: "var(--muted)" }}>{c.teacher?.name} · {fmt(c.scheduledAt)}</span>}
           footerLeft={c.subject?.name}

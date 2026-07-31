@@ -62,17 +62,17 @@ const LoginScreen = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: "#f5f5f5", p: 2 }}>
+    <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: "#F7F7F8", p: 2 }}>
       <Paper variant="outlined" sx={{ p: 4, width: 380, maxWidth: "100%" }}>
         <Link to="/" style={{ color: "var(--primary)", fontSize: 14, textDecoration: "none" }}>← Back to home</Link>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: "#1976d3", mb: 0.5, mt: 1.5 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: "#171717", mb: 0.5, mt: 1.5 }}>
           B.Sc Nepal
         </Typography>
-        <Typography variant="body2" sx={{ color: "#6b7280", mb: 3 }}>
+        <Typography variant="body2" sx={{ color: "#71717A", mb: 3 }}>
           Sign in to continue
         </Typography>
 
-        <Typography variant="overline" sx={{ color: "#6b7280" }}>
+        <Typography variant="overline" sx={{ color: "#71717A" }}>
           Students
         </Typography>
         <Box sx={{ mb: 2, mt: 1 }}>
@@ -110,8 +110,7 @@ const LoginScreen = () => {
               },
             }}
           />
-          <Button fullWidth type="submit" variant="contained" disabled={sLoading}
-            sx={{ bgcolor: "#1976d3", "&:hover": { bgcolor: "#1565c0" } }}>
+          <Button fullWidth type="submit" variant="contained" disabled={sLoading}>
             {sLoading ? "Signing in…" : "Sign in"}
           </Button>
         </form>

@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  Box, Button, Chip, MenuItem, Select, FormControl, InputLabel, TextField, Typography,
+  Box, Button, MenuItem, Select, FormControl, InputLabel, TextField, Typography,
 } from "@mui/material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
+import StatusBadge from "../../../../components/Shared/StatusBadge";
 import { useGetPayoutQuery, useUpdatePayoutMutation } from "../../../../store/services/payoutApi";
-
-const STATUS_COLOR = { pending: "default", processing: "info", paid: "success", failed: "error" };
 
 const PayoutDetailScreen = () => {
   const { id } = useParams();
@@ -43,7 +42,7 @@ const PayoutDetailScreen = () => {
           <Box sx={{ p: 3, display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
             <Typography sx={{ gridColumn: "1 / -1" }} variant="h6">{payout.teacher?.name}</Typography>
             <Typography variant="body2">Period: {new Date(payout.periodStart).toLocaleDateString()} – {new Date(payout.periodEnd).toLocaleDateString()}</Typography>
-            <Typography variant="body2">Current status: <Chip size="small" label={payout.status} color={STATUS_COLOR[payout.status]} /></Typography>
+            <Typography variant="body2">Current status: <StatusBadge status={payout.status} /></Typography>
             <Typography variant="body2">Attributed subscriptions: {payout.attributedSubscriptions}</Typography>
             <Typography variant="body2">Attributed revenue: NPR {payout.attributedRevenue?.toLocaleString()}</Typography>
             <Typography variant="body2">Revenue share: {payout.revenueSharePercent}%</Typography>
@@ -62,7 +61,7 @@ const PayoutDetailScreen = () => {
             <TextField size="small" label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
             <Box sx={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end" }}>
-              <Button variant="contained" sx={{ bgcolor: "#1976d3" }} disabled={saving} onClick={save}>Save</Button>
+              <Button variant="contained" disabled={saving} onClick={save}>Save</Button>
             </Box>
           </Box>
         </BreadcrumbLayout.Paper>

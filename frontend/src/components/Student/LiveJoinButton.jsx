@@ -36,7 +36,7 @@ const LiveJoinButton = ({ liveClass }) => {
     return (
       <button
         onClick={leave}
-        style={{ background: "transparent", color: "#8C7B6B", border: "1px solid #E7E0D4", borderRadius: 6, padding: "6px 12px", cursor: "pointer" }}
+        style={{ background: "transparent", color: "#71717A", border: "1px solid #D4D4D8", borderRadius: 6, padding: "6px 12px", cursor: "pointer" }}
       >
         In class — leave
       </button>
@@ -47,7 +47,7 @@ const LiveJoinButton = ({ liveClass }) => {
     <button
       onClick={join}
       disabled={isFetching}
-      style={{ background: "#2D5A3D", color: "#fff", border: 0, borderRadius: 6, padding: "6px 14px", cursor: isFetching ? "default" : "pointer", fontWeight: 600 }}
+      style={{ background: "var(--primary)", color: "#fff", border: 0, borderRadius: 6, padding: "6px 14px", cursor: isFetching ? "default" : "pointer", fontWeight: 600 }}
     >
       {isFetching ? "Joining…" : "Join"}
     </button>

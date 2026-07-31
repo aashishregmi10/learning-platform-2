@@ -1,23 +1,18 @@
 import { Link } from "react-router-dom";
 
+import { tokens } from "../../theme";
 import { getSubjectImage, getSubjectIcon } from "../../utils/subjectVisuals";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
-const CATEGORY_COLOR = {
-  Core: "#1976d3",
-  Elective: "#2D5A3D",
-  Practical: "#b26a00",
-  "Ability Enhancement": "#7b1fa2",
-};
-
 // Richer public-facing subject card — cover image, category chip, star
-// rating (when reviewed), price + chapter count.
+// rating (when reviewed), price + chapter count. The category chip used to
+// pick a colour per category; category carries no good/bad meaning, so it's
+// grey now and the cover stays a neutral ink wash.
 const SubjectCard = ({ subject }) => {
   const uploadedImage = subject.thumbnail;
   const image = uploadedImage || getSubjectImage(subject.name);
   const Icon = getSubjectIcon(subject.name);
-  const chipColor = CATEGORY_COLOR[subject.category] || "#1976d3";
 
   return (
     <Link
@@ -30,7 +25,7 @@ const SubjectCard = ({ subject }) => {
     >
       <div
         style={{
-          height: 110, background: `linear-gradient(135deg, ${chipColor}, #10365e)`,
+          height: 110, background: `linear-gradient(135deg, ${tokens.body}, ${tokens.ink})`,
           display: "flex", alignItems: "center", justifyContent: "center", position: "relative",
         }}
       >
@@ -49,7 +44,7 @@ const SubjectCard = ({ subject }) => {
         )}
         <span
           style={{
-            position: "absolute", top: 10, left: 10, background: "rgba(255,255,255,0.9)", color: chipColor,
+            position: "absolute", top: 10, left: 10, background: "rgba(255,255,255,0.92)", color: tokens.body,
             fontSize: 11, fontWeight: 700, borderRadius: 20, padding: "3px 10px",
           }}
         >
@@ -57,16 +52,16 @@ const SubjectCard = ({ subject }) => {
         </span>
       </div>
       <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 8 }}>
-        <span style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3, color: "#1C1C1C" }}>{subject.name}</span>
+        <span style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3, color: "#171717" }}>{subject.name}</span>
         {subject.ratingCount > 0 && (
-          <span style={{ fontSize: 13, color: "#b26a00" }}>
+          <span style={{ fontSize: 13, color: "var(--status-warning-fg)" }}>
             {"★".repeat(Math.round(subject.ratingAverage))}
             {"☆".repeat(5 - Math.round(subject.ratingAverage))}
             <span style={{ color: "var(--muted)", marginLeft: 6 }}>({subject.ratingCount})</span>
           </span>
         )}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
-          <span style={{ fontFamily: "monospace", color: "#1C1C1C", fontWeight: 700, fontSize: 15 }}>{money(subject.pricing?.discountedPrice)}</span>
+          <span style={{ fontFamily: "monospace", color: "#171717", fontWeight: 700, fontSize: 15 }}>{money(subject.pricing?.discountedPrice)}</span>
           <span style={{ fontSize: 12, color: "var(--muted)" }}>{subject.totalChapters} chapters</span>
         </div>
       </div>

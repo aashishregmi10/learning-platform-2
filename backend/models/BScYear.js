@@ -16,6 +16,17 @@ const BScYearSchema = new Schema(
     description: { type: String },
     thumbnail: { type: String },
 
+    // Populated only when the parent program is semester-based. Numbers are
+    // absolute across the program (Year 2 of a 2-per-year program → 3 and 4),
+    // so Subject.semester stays unambiguous without a back-reference.
+    semesters: [
+      {
+        _id: false,
+        semesterNumber: { type: Number, required: true, min: 1, max: 8 },
+        name: { type: String, required: true }, // "Semester 3"
+      },
+    ],
+
     bundlePrice: {
       originalPrice: { type: Number, required: true },
       discountedPrice: { type: Number, required: true },

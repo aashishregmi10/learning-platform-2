@@ -6,10 +6,14 @@ import { slugify } from "../utils/slug.js";
 
 // @route POST /api/programs  (admin)
 export const createProgram = asyncHandler(async (req, res) => {
-  const { name, code, description, thumbnail, durationYears, isActive } = req.body;
+  const { name, code, description, thumbnail, structure, semestersPerYear, isActive } = req.body;
   if (!name) {
     res.status(422);
     throw new Error("name is required");
+  }
+  if (structure && !["yearly", "semester"].includes(structure)) {
+    res.status(422);
+    throw new Error("structure must be 'yearly' or 'semester'");
   }
   const program = await Program.create({
     name,
@@ -17,7 +21,9 @@ export const createProgram = asyncHandler(async (req, res) => {
     code,
     description,
     thumbnail,
-    durationYears,
+    structure,
+    // Only meaningful for semester programs; yearly ones stay at the default.
+    ...(structure === "semester" && semestersPerYear ? { semestersPerYear } : {}),
     isActive,
   });
   res.status(201).json({ data: program, message: "Program created" });
@@ -60,7 +66,16 @@ export const updateProgram = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Program not found");
   }
-  const fields = ["name", "code", "description", "thumbnail", "durationYears", "isActive"];
+  const fields = [
+    "name",
+    "code",
+    "description",
+    "thumbnail",
+    "durationYears",
+    "structure",
+    "semestersPerYear",
+    "isActive",
+  ];
   fields.forEach((f) => {
     if (req.body[f] !== undefined) program[f] = req.body[f];
   });

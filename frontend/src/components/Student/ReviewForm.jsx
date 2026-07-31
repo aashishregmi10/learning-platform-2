@@ -20,13 +20,13 @@ const ReviewForm = ({ subjectId, onDone }) => {
   };
 
   return (
-    <div style={{ border: "1px solid #E7E0D4", borderRadius: 10, padding: 16 }}>
+    <div style={{ border: "1px solid #D4D4D8", borderRadius: 10, padding: 16 }}>
       <div style={{ marginBottom: 8 }}>
         {[1, 2, 3, 4, 5].map((n) => (
           <span
             key={n}
             onClick={() => setRating(n)}
-            style={{ cursor: "pointer", fontSize: 22, color: n <= rating ? "#2D5A3D" : "#E7E0D4" }}
+            style={{ cursor: "pointer", fontSize: 22, color: n <= rating ? "var(--status-warning-fg)" : "#D4D4D8" }}
           >
             ★
           </span>
@@ -37,12 +37,12 @@ const ReviewForm = ({ subjectId, onDone }) => {
         onChange={(e) => setComment(e.target.value)}
         placeholder="How was this subject? (optional)"
         rows={2}
-        style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #E7E0D4", fontFamily: "inherit", resize: "vertical" }}
+        style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #D4D4D8", fontFamily: "inherit", resize: "vertical" }}
       />
       <button
         onClick={submit}
         disabled={isLoading}
-        style={{ marginTop: 8, background: "#2D5A3D", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 600 }}
+        style={{ marginTop: 8, background: "var(--primary)", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 600 }}
       >
         {isLoading ? "Posting…" : "Post review"}
       </button>

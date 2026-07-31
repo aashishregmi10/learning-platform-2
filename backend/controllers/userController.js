@@ -28,10 +28,19 @@ const paginate = async (Model, match, { page, limit, sort = { createdAt: -1 } })
   };
 };
 
+/** "Aashish Kumar Regmi" — middle name is optional, so no double spaces. */
+const composeName = (firstName, middleName, surname) =>
+  [firstName, middleName, surname]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(" ");
+
 // @route POST /api/users/teachers  (admin)
 export const createTeacher = asyncHandler(async (req, res) => {
   const {
-    name,
+    firstName,
+    middleName,
+    surname,
     email,
     password,
     qualification,
@@ -41,10 +50,12 @@ export const createTeacher = asyncHandler(async (req, res) => {
     assignedSubjects = [],
   } = req.body;
 
-  if (!name || !email || !password) {
+  if (!firstName?.trim() || !surname?.trim() || !email || !password) {
     res.status(422);
-    throw new Error("name, email and password are required");
+    throw new Error("first name, surname, email and password are required");
   }
+
+  const name = composeName(firstName, middleName, surname);
 
   const existing = await User.findOne({
     email: email.toLowerCase(),
@@ -59,6 +70,9 @@ export const createTeacher = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     name,
+    firstName: firstName.trim(),
+    middleName: middleName?.trim() || undefined,
+    surname: surname.trim(),
     email,
     passwordHash,
     authProvider: "password",

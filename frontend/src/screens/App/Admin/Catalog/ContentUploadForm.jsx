@@ -38,7 +38,7 @@ const ContentUploadForm = ({ chapterId, onDone }) => {
   };
 
   return (
-    <Box component="form" onSubmit={submit} sx={{ p: 2, mb: 1, border: "1px solid #e0e0e0", borderRadius: 1, display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+    <Box component="form" onSubmit={submit} sx={{ p: 2, mb: 1, border: "1px solid #E5E5E5", borderRadius: 1, display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
       <TextField select size="small" label="Type" value={form.type} onChange={set("type")}>
         {TYPES.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
       </TextField>
@@ -54,7 +54,7 @@ const ContentUploadForm = ({ chapterId, onDone }) => {
       {NEEDS_FILE.includes(form.type) && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-          <Typography variant="caption" sx={{ display: "block", color: "#6b7280" }}>
+          <Typography variant="caption" sx={{ display: "block", color: "#71717A" }}>
             Uploaded privately to Cloudinary; students get short-lived signed URLs.
           </Typography>
         </Box>
@@ -67,7 +67,7 @@ const ContentUploadForm = ({ chapterId, onDone }) => {
       />
       <Box sx={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end", gap: 1 }}>
         <Button onClick={onDone} disabled={isLoading}>Cancel</Button>
-        <Button type="submit" variant="contained" sx={{ bgcolor: "#1976d3" }} disabled={isLoading}>
+        <Button type="submit" variant="contained" disabled={isLoading}>
           {isLoading ? "Uploading…" : "Add"}
         </Button>
       </Box>

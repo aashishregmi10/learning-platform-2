@@ -1,9 +1,11 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Box, Button, Chip, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Box, Button, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material";
 import { Add, DeleteOutlined, EditOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
+import StatusChip from "../../../../components/Shared/StatusChip";
+import { tokens } from "../../../../theme";
 import { useAuth } from "../../../../hooks/useAuth";
 import {
   useListQuizzesQuery,
@@ -46,7 +48,6 @@ const QuizListScreen = () => {
             to={`/app/${role}/quizzes/create?chapter=${chapter}${subject ? `&subject=${subject}` : ""}`}
             startIcon={<Add />}
             variant="contained"
-            sx={{ bgcolor: "#1976d3" }}
           >
             New Quiz
           </Button>
@@ -54,23 +55,29 @@ const QuizListScreen = () => {
       }
     >
       <BreadcrumbLayout.Error error={error} />
-      {!chapter && <Typography sx={{ p: 2, color: "#6b7280" }}>No chapter selected.</Typography>}
+      {!chapter && <Typography sx={{ p: 2, color: tokens.muted }}>No chapter selected.</Typography>}
 
       <BreadcrumbLayout.Paper>
         <List dense>
           {chapter && quizzes.length === 0 && !isFetching && (
-            <Typography sx={{ p: 2, color: "#6b7280" }}>No quizzes yet — add the first one.</Typography>
+            <Typography sx={{ p: 2, color: tokens.muted }}>No quizzes yet — add the first one.</Typography>
           )}
           {quizzes.map((q) => (
             <ListItem
               key={q._id}
               secondaryAction={
                 <>
-                  <IconButton size="small" title={q.isPublished ? "Unpublish" : "Publish"} onClick={() => togglePublish(q)}>
+                  <IconButton
+                    size="small"
+                    color={q.isPublished ? "success" : "warning"}
+                    title={q.isPublished ? "Unpublish" : "Publish"}
+                    onClick={() => togglePublish(q)}
+                  >
                     {q.isPublished ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                   </IconButton>
                   <IconButton
                     size="small"
+                    color="primary"
                     title="Edit"
                     onClick={() => navigate(`/app/${role}/quizzes/${q._id}/edit?chapter=${chapter}${subject ? `&subject=${subject}` : ""}`)}
                   >
@@ -97,7 +104,7 @@ const QuizListScreen = () => {
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <ListItemText primary={q.title} secondary={`${q.questions.length} question${q.questions.length !== 1 ? "s" : ""} · passing ${q.passingScore}%`} />
-                <Chip size="small" label={q.isPublished ? "Published" : "Draft"} color={q.isPublished ? "success" : "default"} />
+                <StatusChip active={q.isPublished} />
               </Box>
             </ListItem>
           ))}

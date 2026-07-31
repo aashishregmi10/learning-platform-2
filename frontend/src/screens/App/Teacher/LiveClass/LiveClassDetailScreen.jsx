@@ -1,9 +1,11 @@
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Box, Button, Chip, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Box, Button, List, ListItem, ListItemText, Typography } from "@mui/material";
 import { EditOutlined, PlayArrowOutlined, StopOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
+import StatusBadge from "../../../../components/Shared/StatusBadge";
+import { tokens } from "../../../../theme";
 import CustomTabs from "../../../../components/Shared/CustomTabs";
 import CustomTabPanel from "../../../../components/Shared/CustomTabPanel";
 import { useAuth } from "../../../../hooks/useAuth";
@@ -16,8 +18,6 @@ import {
 import { useGetLiveClassDoubtsQuery } from "../../../../store/services/doubtApi";
 import DoubtThread from "../../../../components/Student/DoubtThread";
 import DoubtComposer from "../../../../components/Student/DoubtComposer";
-
-const STATUS_COLOR = { scheduled: "default", live: "success", ended: "info", cancelled: "error" };
 
 const LiveClassDetailScreen = () => {
   const { id } = useParams();
@@ -55,7 +55,7 @@ const LiveClassDetailScreen = () => {
               Edit
             </Button>
             {liveClass.status === "scheduled" && (
-              <Button size="small" startIcon={<PlayArrowOutlined />} variant="contained" sx={{ bgcolor: "#2D5A3D" }} onClick={() => act(startLiveClass, "Class started")}>
+              <Button size="small" startIcon={<PlayArrowOutlined />} variant="contained" onClick={() => act(startLiveClass, "Class started")}>
                 Start
               </Button>
             )}
@@ -75,7 +75,7 @@ const LiveClassDetailScreen = () => {
           <BreadcrumbLayout.Paper>
             <Box sx={{ p: 2, display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
               <Typography variant="h6">{liveClass.title}</Typography>
-              <Chip size="small" label={liveClass.status} color={STATUS_COLOR[liveClass.status]} />
+              <StatusBadge status={liveClass.status} />
               <Chip size="small" variant="outlined" label={liveClass.subject?.name} />
               <Chip size="small" variant="outlined" label={new Date(liveClass.scheduledAt).toLocaleString()} />
               <Chip size="small" variant="outlined" label={`${liveClass.duration} min`} />
@@ -91,7 +91,7 @@ const LiveClassDetailScreen = () => {
           <CustomTabPanel activeTab={activeTab} value="overview">
             <BreadcrumbLayout.Paper>
               <Box sx={{ p: 2 }}>
-                <Typography variant="body2" sx={{ color: "#6b7280", mb: 1 }}>{liveClass.description || "No description."}</Typography>
+                <Typography variant="body2" sx={{ color: tokens.muted, mb: 1 }}>{liveClass.description || "No description."}</Typography>
                 <Typography variant="body2">Audience: {liveClass.audience}</Typography>
                 <Typography variant="body2">Meeting link: {liveClass.meetingLink || "—"}</Typography>
               </Box>
@@ -102,7 +102,7 @@ const LiveClassDetailScreen = () => {
             <BreadcrumbLayout.Paper>
               <List dense>
                 {attendance.length === 0 && (
-                  <Typography sx={{ p: 2, color: "#6b7280" }}>No attendance recorded yet.</Typography>
+                  <Typography sx={{ p: 2, color: tokens.muted }}>No attendance recorded yet.</Typography>
                 )}
                 {attendance.map((a) => (
                   <ListItem key={a._id}>

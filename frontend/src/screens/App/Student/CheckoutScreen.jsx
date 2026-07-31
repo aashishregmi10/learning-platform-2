@@ -112,8 +112,10 @@ const CheckoutScreen = () => {
             </Box>
 
             <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+              {/* eSewa's own brand green — a payment provider's mark, deliberately
+                  kept outside the status palette so shoppers recognise it. */}
               <Button variant="contained" size="large" disabled={busy} onClick={payWithEsewa}
-                sx={{ bgcolor: "#60bb46", "&:hover": { bgcolor: "#4e9e39" } }}>
+                sx={{ bgcolor: "#60BB46", "&:hover": { bgcolor: "#4E9E39" } }}>
                 Pay with eSewa
               </Button>
               <Typography variant="caption" sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center", color: "var(--muted)" }}>

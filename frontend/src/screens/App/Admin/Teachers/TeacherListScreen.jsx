@@ -4,6 +4,8 @@ import { Add, MenuBookOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
+import StatusChip from "../../../../components/Shared/StatusChip";
+import { tokens } from "../../../../theme";
 import { useTablePagination } from "../../../../hooks/useTablePagination";
 import { useGetTeachersQuery } from "../../../../store/services/userApi";
 
@@ -22,7 +24,7 @@ const TeacherListScreen = () => {
     {
       name: "Name",
       cell: (r) => (
-        <Link to={`/app/admin/teachers/${r._id}`} style={{ color: "#1976d3", fontWeight: 600, textDecoration: "none" }}>
+        <Link to={`/app/admin/teachers/${r._id}`} style={{ color: tokens.ink, fontWeight: 600, textDecoration: "none" }}>
           {r.name}
         </Link>
       ),
@@ -30,11 +32,22 @@ const TeacherListScreen = () => {
     },
     { name: "Email", selector: (r) => r.email },
     {
+      // A subject count is descriptive, not a verdict — plain grey chip.
       name: "Assigned",
-      cell: (r) => <Chip size="small" label={`${r.assignedSubjectsCount ?? 0} subject${r.assignedSubjectsCount === 1 ? "" : "s"}`} color={r.assignedSubjectsCount ? "success" : "default"} />,
+      cell: (r) => (
+        <Chip
+          size="small"
+          variant="outlined"
+          label={`${r.assignedSubjectsCount ?? 0} subject${r.assignedSubjectsCount === 1 ? "" : "s"}`}
+        />
+      ),
       width: "140px",
     },
-    { name: "Active", selector: (r) => (r.isActive ? "Yes" : "No"), width: "90px" },
+    {
+      name: "Active",
+      cell: (r) => <StatusChip active={r.isActive} labels={["Active", "Inactive"]} offRole="danger" />,
+      width: "110px",
+    },
     {
       name: "Subjects",
       cell: (r) => (
@@ -56,7 +69,7 @@ const TeacherListScreen = () => {
     <BreadcrumbLayout
       breadcrumbs={[{ title: "Teachers" }]}
       headerActions={
-        <Button component={Link} to="/app/admin/teachers/create" startIcon={<Add />} variant="contained" sx={{ bgcolor: "#1976d3" }}>
+        <Button component={Link} to="/app/admin/teachers/create" startIcon={<Add />} variant="contained">
           New Teacher
         </Button>
       }

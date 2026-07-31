@@ -57,7 +57,7 @@ const TYPE_ICON = {
 const ChapterDoubts = ({ chapterId }) => {
   const { data } = useGetChapterDoubtsQuery(chapterId);
   return (
-    <div style={{ padding: "12px 16px", background: "#fafafa", borderTop: "1px solid #eeeeee", borderRadius: 8 }}>
+    <div style={{ padding: "12px 16px", background: "#FBFBFC", borderTop: "1px solid #E5E5E5", borderRadius: 8 }}>
       <DoubtThread doubts={data?.data} chapter={chapterId} />
       <div style={{ marginTop: 8 }}>
         <DoubtComposer chapter={chapterId} />
@@ -166,7 +166,7 @@ const SubjectViewScreen = () => {
                 <span>{certStatus.percent}%</span>
               </div>
               <div style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,0.2)", overflow: "hidden" }}>
-                <div style={{ width: `${certStatus.percent}%`, height: "100%", background: "var(--student-gold)", borderRadius: 4 }} />
+                <div style={{ width: `${certStatus.percent}%`, height: "100%", background: "var(--status-warning-solid)", borderRadius: 4 }} />
               </div>
             </div>
           )}
@@ -181,12 +181,12 @@ const SubjectViewScreen = () => {
           </div>
         )}
         {entitled && (
-          <div style={{ background: "var(--success-accent)", border: "1px solid var(--success)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, color: "#2e7d32" }}>
+          <div style={{ background: "var(--status-success-bg)", border: "1px solid var(--status-success-solid)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, color: "var(--status-success-fg)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600 }}>
               <span>✓ You're enrolled — all content unlocked.</span>
             </div>
             {certStatus?.certificate && (
-              <Link to="/app/student/certificates" style={{ color: "#2e7d32", fontSize: 14 }}>
+              <Link to="/app/student/certificates" style={{ color: "var(--status-success-fg)", fontSize: 14 }}>
                 🎓 View your certificate →
               </Link>
             )}
@@ -195,7 +195,7 @@ const SubjectViewScreen = () => {
 
         {catalog.chapters.map((ch, idx) => (
           <Accordion key={ch._id} defaultExpanded={idx === 0} disableGutters sx={{ mb: 2, border: "1px solid var(--border)", borderRadius: "10px !important", "&:before": { display: "none" }, overflow: "hidden" }}>
-            <AccordionSummary expandIcon={<ExpandMoreOutlined />} sx={{ bgcolor: "#f5f5f5" }}>
+            <AccordionSummary expandIcon={<ExpandMoreOutlined />} sx={{ bgcolor: "#F7F7F8" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", paddingRight: 8 }}>
                 <strong>{ch.chapterNumber}. {ch.title}</strong>
                 {ch.isFreePreview && <Chip size="small" label="Free preview" sx={{ bgcolor: "var(--primary-accent)", color: "var(--student-ink-2)", fontWeight: 700 }} />}
@@ -220,7 +220,7 @@ const SubjectViewScreen = () => {
                     <ListItem
                       key={item._id}
                       disablePadding
-                      sx={{ borderTop: "1px solid #eeeeee" }}
+                      sx={{ borderTop: "1px solid #E5E5E5" }}
                       secondaryAction={
                         item.locked ? (
                           <Chip size="small" icon={<LockOutlined fontSize="small" />} label="Locked" />
@@ -239,16 +239,16 @@ const SubjectViewScreen = () => {
                       }
                     >
                       <ListItemButton disabled={item.locked} onClick={() => open(item)} sx={{ pr: 22 }}>
-                        <ListItemIcon sx={{ minWidth: 34, color: item.locked ? "#9e9e9e" : "var(--student-ink)" }}>
+                        <ListItemIcon sx={{ minWidth: 34, color: item.locked ? "var(--faint)" : "var(--student-ink)" }}>
                           {done ? <CheckCircle fontSize="small" sx={{ color: "var(--success)" }} /> : TYPE_ICON[item.type]}
                         </ListItemIcon>
-                        <ListItemText primary={item.title} sx={{ color: item.locked ? "#9e9e9e" : "inherit" }} />
+                        <ListItemText primary={item.title} sx={{ color: item.locked ? "var(--faint)" : "inherit" }} />
                       </ListItemButton>
                     </ListItem>
                   );
                 })}
                 {ch.items.length === 0 && (
-                  <ListItem sx={{ borderTop: "1px solid #eeeeee" }}>
+                  <ListItem sx={{ borderTop: "1px solid #E5E5E5" }}>
                     <ListItemText primary="No content yet." sx={{ color: "var(--muted)" }} />
                   </ListItem>
                 )}
@@ -257,22 +257,22 @@ const SubjectViewScreen = () => {
                   <ListItem
                     key={q._id}
                     disablePadding
-                    sx={{ borderTop: "1px solid #eeeeee", bgcolor: "#fffdf5" }}
+                    sx={{ borderTop: "1px solid #E5E5E5", bgcolor: "var(--surface-muted)" }}
                     secondaryAction={
                       q.locked ? (
                         <Chip size="small" icon={<LockOutlined fontSize="small" />} label="Locked" />
                       ) : (
-                        <Button size="small" variant="contained" sx={{ bgcolor: "#2D5A3D", "&:hover": { bgcolor: "#234a30" } }} onClick={() => navigate(`/app/student/quizzes/${q._id}`)}>
+                        <Button size="small" variant="contained" onClick={() => navigate(`/app/student/quizzes/${q._id}`)}>
                           Take quiz
                         </Button>
                       )
                     }
                   >
                     <ListItemButton disabled={q.locked} onClick={() => !q.locked && navigate(`/app/student/quizzes/${q._id}`)} sx={{ pr: 20 }}>
-                      <ListItemIcon sx={{ minWidth: 34, color: q.locked ? "#9e9e9e" : "var(--student-ink)" }}>
+                      <ListItemIcon sx={{ minWidth: 34, color: q.locked ? "var(--faint)" : "var(--student-ink)" }}>
                         <QuizOutlined fontSize="small" />
                       </ListItemIcon>
-                      <ListItemText primary={q.title} sx={{ color: q.locked ? "#9e9e9e" : "inherit" }} />
+                      <ListItemText primary={q.title} sx={{ color: q.locked ? "var(--faint)" : "inherit" }} />
                     </ListItemButton>
                   </ListItem>
                 ))}

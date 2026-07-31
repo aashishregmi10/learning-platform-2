@@ -8,7 +8,9 @@ import { useCreateTeacherMutation } from "../../../../store/services/userApi";
 import { useGetSubjectsQuery } from "../../../../store/services/subjectApi";
 
 const empty = {
-  name: "",
+  firstName: "",
+  middleName: "",
+  surname: "",
   email: "",
   password: "",
   qualification: "",
@@ -53,7 +55,9 @@ const TeacherCreateScreen = () => {
               gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             }}
           >
-            <TextField fullWidth required size="small" label="Name" value={form.name} onChange={set("name")} />
+            <TextField fullWidth required size="small" label="First name" value={form.firstName} onChange={set("firstName")} />
+            <TextField fullWidth size="small" label="Middle name (optional)" value={form.middleName} onChange={set("middleName")} />
+            <TextField fullWidth required size="small" label="Surname" value={form.surname} onChange={set("surname")} />
             <TextField fullWidth required size="small" label="Email" type="email" value={form.email} onChange={set("email")} />
             <TextField fullWidth required size="small" label="Temp Password" value={form.password} onChange={set("password")} />
             <TextField fullWidth size="small" label="Qualification" value={form.qualification} onChange={set("qualification")} />
@@ -73,7 +77,7 @@ const TeacherCreateScreen = () => {
           </Box>
           <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 1 }}>
             <Button onClick={() => navigate(-1)} disabled={isLoading}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={isLoading} sx={{ bgcolor: "#1976d3" }}>
+            <Button type="submit" variant="contained" disabled={isLoading}>
               Create
             </Button>
           </Box>

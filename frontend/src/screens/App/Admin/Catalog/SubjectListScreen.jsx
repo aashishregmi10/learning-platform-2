@@ -1,9 +1,10 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Button, Chip, IconButton } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 import { Add, InfoOutlined, EditOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
+import StatusChip from "../../../../components/Shared/StatusChip";
 import { useTablePagination } from "../../../../hooks/useTablePagination";
 import { useGetSubjectsQuery } from "../../../../store/services/subjectApi";
 
@@ -23,7 +24,7 @@ const SubjectListScreen = () => {
 
   const columns = [
     { name: "Name", selector: (r) => r.name, grow: 2, cell: (r) => (
-      <Link to={`/app/admin/catalog/subjects/${r._id}`} style={{ color: "#1976d3" }}>{r.name}</Link>
+      <Link to={`/app/admin/catalog/subjects/${r._id}`} style={{ color: "#171717" }}>{r.name}</Link>
     ) },
     { name: "Year", selector: (r) => r.year?.yearName || "—", width: "110px" },
     { name: "Code", selector: (r) => r.subjectCode || "—", width: "110px" },
@@ -31,17 +32,17 @@ const SubjectListScreen = () => {
     { name: "Chapters", selector: (r) => r.totalChapters, width: "100px" },
     {
       name: "Status",
-      cell: (r) => <Chip size="small" label={r.isActive ? "Active" : "Draft"} color={r.isActive ? "success" : "default"} />,
+      cell: (r) => <StatusChip active={r.isActive} labels={["Active", "Draft"]} />,
       width: "110px",
     },
     {
       name: "Actions",
       cell: (r) => (
         <>
-          <IconButton size="small" title="Open" onClick={() => navigate(`/app/admin/catalog/subjects/${r._id}`)}>
+          <IconButton size="small" color="primary" title="Open" onClick={() => navigate(`/app/admin/catalog/subjects/${r._id}`)}>
             <InfoOutlined fontSize="small" />
           </IconButton>
-          <IconButton size="small" title="Edit" onClick={() => navigate(`/app/admin/catalog/subjects/${r._id}/edit`)}>
+          <IconButton size="small" color="primary" title="Edit" onClick={() => navigate(`/app/admin/catalog/subjects/${r._id}/edit`)}>
             <EditOutlined fontSize="small" />
           </IconButton>
         </>
@@ -56,7 +57,7 @@ const SubjectListScreen = () => {
     <BreadcrumbLayout
       breadcrumbs={[{ title: "Catalog" }, { title: "Subjects" }]}
       headerActions={
-        <Button component={Link} to={createHref} startIcon={<Add />} variant="contained" sx={{ bgcolor: "#1976d3" }}>
+        <Button component={Link} to={createHref} startIcon={<Add />} variant="contained">
           New Subject
         </Button>
       }

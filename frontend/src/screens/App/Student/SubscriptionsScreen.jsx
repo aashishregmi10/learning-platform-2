@@ -6,10 +6,11 @@ import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 import PageHeader from "../../../components/Student/PageHeader";
 import EmptyState from "../../../components/Student/EmptyState";
 import InfoCard from "../../../components/Student/InfoCard";
+import { roleFor } from "../../../utils/statusRole";
+import { tokens } from "../../../theme";
 
 const fmt = (d) => new Date(d).toLocaleDateString();
-const STATUS_COLOR = { active: "#2e7d32", pending: "#ed6c02", expired: "#6b7280", cancelled: "#6b7280", refunded: "#d32f2f" };
-const TYPE_ICON = { subject: <MenuBookOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} />, year: <CalendarMonthOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} />, program: <SchoolOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} /> };
+const TYPE_ICON = { subject: <MenuBookOutlined sx={{ fontSize: 30, color: tokens.faint }} />, year: <CalendarMonthOutlined sx={{ fontSize: 30, color: tokens.faint }} />, program: <SchoolOutlined sx={{ fontSize: 30, color: tokens.faint }} /> };
 
 const label = (s) =>
   s.type === "subject" ? s.subject?.name : s.type === "year" ? s.year?.yearName : s.program?.name;
@@ -38,14 +39,15 @@ const SubscriptionsScreen = () => {
             <InfoCard
               key={s._id}
               pills={[
-                { label: s.type, tone: "solid" },
-                { label: s.status, tone: "outline", color: STATUS_COLOR[s.status] || "#6b7280" },
+                { label: s.type },
+                { label: s.status, role: roleFor(s.status) },
               ]}
               icon={TYPE_ICON[s.type]}
               title={label(s)}
               meta={<span style={{ fontSize: 13, color: "var(--muted)" }}>Expires {fmt(s.expiresAt)}</span>}
               footerLeft={s.type}
               footerRight={s.status === "active" ? "Active" : s.status}
+              footerRole={roleFor(s.status)}
             />
           ))}
         </div>

@@ -119,7 +119,7 @@ const QuizFormScreen = () => {
           <Typography variant="subtitle1">Questions</Typography>
 
           {form.questions.map((q, qi) => (
-            <Box key={qi} sx={{ border: "1px solid #e0e0e0", borderRadius: 2, p: 2, display: "grid", gap: 1.5 }}>
+            <Box key={qi} sx={{ border: "1px solid #E5E5E5", borderRadius: 2, p: 2, display: "grid", gap: 1.5 }}>
               <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
                 <TextField
                   fullWidth size="small" label={`Question ${qi + 1}`} value={q.questionText}
@@ -160,7 +160,7 @@ const QuizFormScreen = () => {
 
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>
             <Button onClick={backTo}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#1976d3" }}>{isEdit ? "Update" : "Create"}</Button>
+            <Button type="submit" variant="contained">{isEdit ? "Update" : "Create"}</Button>
           </Box>
         </Box>
       </BreadcrumbLayout.Paper>

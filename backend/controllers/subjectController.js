@@ -88,7 +88,7 @@ export const listSubjects = asyncHandler(async (req, res) => {
           localField: "year",
           foreignField: "_id",
           as: "year",
-          pipeline: [{ $project: { yearNumber: 1, yearName: 1 } }],
+          pipeline: [{ $project: { yearNumber: 1, yearName: 1, semesters: 1 } }],
         },
       },
       { $unwind: { path: "$year", preserveNullAndEmptyArrays: true } },
@@ -104,7 +104,7 @@ export const listSubjects = asyncHandler(async (req, res) => {
 export const getSubject = asyncHandler(async (req, res) => {
   const subject = await Subject.findOne({ _id: req.params.id, isDeleted: false })
     .populate("program", "name slug")
-    .populate("year", "yearNumber yearName");
+    .populate("year", "yearNumber yearName semesters");
   if (!subject) {
     res.status(404);
     throw new Error("Subject not found");
@@ -116,7 +116,7 @@ export const getSubject = asyncHandler(async (req, res) => {
 export const getSubjectBySlug = asyncHandler(async (req, res) => {
   const subject = await Subject.findOne({ slug: req.params.slug, isActive: true, isDeleted: false })
     .populate("program", "name slug")
-    .populate("year", "yearNumber yearName");
+    .populate("year", "yearNumber yearName semesters");
   if (!subject) {
     res.status(404);
     throw new Error("Subject not found");

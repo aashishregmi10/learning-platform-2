@@ -2,26 +2,42 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, IconButton, List,
-  ListItem, ListItemText, Switch, Tooltip, Typography,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Typography,
 } from "@mui/material";
 import {
-  ExpandMore, Add, DeleteOutlined, Visibility, VisibilityOff,
-  OndemandVideo, PictureAsPdf, Notes, Link as LinkIcon, QuizOutlined, QuestionAnswerOutlined,
+  ExpandMore,
+  Add,
+  DeleteOutlined,
+  Visibility,
+  VisibilityOff,
+  QuizOutlined,
+  QuestionAnswerOutlined,
 } from "@mui/icons-material";
 
+import { statusTokens, tokens } from "../../../../theme";
+import StatusBadge from "../../../../components/Shared/StatusBadge";
+import { TypeChip, typeMeta } from "../../../../components/Shared/TypeChip";
+import { relativeTime } from "../../../../utils/relativeTime";
 import {
   useGetContentsQuery,
   useDeleteContentMutation,
 } from "../../../../store/services/contentApi";
-import { useUpdateChapterMutation, useDeleteChapterMutation } from "../../../../store/services/chapterApi";
+import {
+  useUpdateChapterMutation,
+  useDeleteChapterMutation,
+} from "../../../../store/services/chapterApi";
 import { useGetChapterDoubtsQuery } from "../../../../store/services/doubtApi";
 import { useAuth } from "../../../../hooks/useAuth";
 import ContentUploadForm from "./ContentUploadForm";
 import DoubtThread from "../../../../components/Student/DoubtThread";
 import DoubtComposer from "../../../../components/Student/DoubtComposer";
-
-const ICON = { video: <OndemandVideo fontSize="small" />, pdf: <PictureAsPdf fontSize="small" />, note: <Notes fontSize="small" />, link: <LinkIcon fontSize="small" />, audio: <OndemandVideo fontSize="small" /> };
 
 const ChapterPanel = ({ chapter }) => {
   const { role } = useAuth();
@@ -35,6 +51,7 @@ const ChapterPanel = ({ chapter }) => {
   const { data: doubtsRes } = useGetChapterDoubtsQuery(chapter._id, { skip: !showDoubts });
 
   const contents = data?.data ?? [];
+  const editedAt = relativeTime(chapter.updatedAt || chapter.createdAt);
 
   const togglePublish = async () => {
     try {
@@ -44,80 +61,166 @@ const ChapterPanel = ({ chapter }) => {
     }
   };
 
+  const removeChapter = async () => {
+    if (!confirm("Delete this chapter?")) return;
+    try {
+      await deleteChapter(chapter._id).unwrap();
+    } catch {
+      toast.error("Could not delete this chapter");
+    }
+  };
+
   return (
-    <Accordion variant="outlined" disableGutters>
-      <AccordionSummary expandIcon={<ExpandMore />}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexGrow: 1 }}>
-          <Typography sx={{ fontWeight: 600 }}>
-            {chapter.chapterNumber}. {chapter.title}
+    <Accordion
+      variant="outlined"
+      disableGutters
+      sx={{
+        borderRadius: 2.5,
+        overflow: "hidden",
+        "&:before": { display: "none" },
+        "&.Mui-expanded": { margin: 0 },
+      }}
+    >
+      <AccordionSummary
+        expandIcon={<ExpandMore sx={{ fontSize: 20, color: tokens.muted }} />}
+        sx={{
+          bgcolor: tokens.surfaceMuted,
+          flexDirection: "row-reverse",
+          gap: 1.5,
+          px: 2,
+          "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": { transform: "rotate(180deg)" },
+          "& .MuiAccordionSummary-content": { my: 1.5 },
+        }}
+      >
+        <Box sx={{ flexGrow: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="subtitle2" sx={{ color: tokens.ink }}>
+              Chapter {chapter.chapterNumber}: {chapter.title}
+            </Typography>
+            {/* Free preview is informational; an unpublished chapter needs action. */}
+            {chapter.isFreePreview && <StatusBadge role="info" label="Free preview" />}
+            {!chapter.isPublished && <StatusBadge role="warning" label="Draft" />}
+          </Box>
+          <Typography variant="caption" sx={{ display: "block", mt: 0.25 }}>
+            {contents.length} topic{contents.length === 1 ? "" : "s"}
+            {editedAt ? ` · Last edited ${editedAt}` : ""}
           </Typography>
-          {chapter.isFreePreview && <Chip size="small" color="success" label="Free preview" />}
-          <Chip size="small" variant="outlined" label={chapter.isPublished ? "Published" : "Draft"} />
         </Box>
       </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-          <Tooltip title={chapter.isPublished ? "Unpublish" : "Publish"}>
-            <Button size="small" startIcon={chapter.isPublished ? <VisibilityOff /> : <Visibility />} onClick={togglePublish}>
-              {chapter.isPublished ? "Unpublish" : "Publish"}
-            </Button>
-          </Tooltip>
-          <Box>
-            <Button
-              size="small"
-              startIcon={<QuizOutlined />}
-              onClick={() => navigate(`/app/${role}/quizzes?chapter=${chapter._id}&subject=${chapter.subject}`)}
-            >
-              Quizzes{chapter.quizCount ? ` (${chapter.quizCount})` : ""}
-            </Button>
-            <Button size="small" startIcon={<Add />} onClick={() => setShowUpload((s) => !s)}>Add content</Button>
-            <Button size="small" startIcon={<QuestionAnswerOutlined />} onClick={() => setShowDoubts((s) => !s)}>Doubts</Button>
-            <IconButton size="small" color="error" title="Delete chapter" onClick={async () => {
-              if (confirm("Delete this chapter?")) {
-                try { await deleteChapter(chapter._id).unwrap(); } catch (e) { toast.error("Failed"); }
-              }
-            }}>
-              <DeleteOutlined fontSize="small" />
-            </IconButton>
-          </Box>
+
+      <AccordionDetails sx={{ p: 0, borderTop: `1px solid ${tokens.border}` }}>
+        <Box sx={{ px: 1, py: 1 }}>
+          {contents.length === 0 && !isFetching && (
+            <Typography variant="body2" sx={{ color: tokens.muted, px: 2, py: 1.5 }}>
+              Nothing in this chapter yet — add the first topic.
+            </Typography>
+          )}
+          {contents.map((c, i) => {
+            const { Icon } = typeMeta(c.type);
+            return (
+              <Box
+                key={c._id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  px: 2,
+                  py: 1.25,
+                  borderRadius: 2,
+                  "&:hover": { bgcolor: tokens.surfaceMuted },
+                  "&:hover .row-actions": { opacity: 1 },
+                }}
+              >
+                <Icon sx={{ fontSize: 18, color: tokens.faint }} />
+                <Typography variant="body2" sx={{ color: tokens.body, flexGrow: 1 }}>
+                  {chapter.chapterNumber}.{c.order || i + 1} {c.title}
+                </Typography>
+                {c.isFree && (
+                  <Typography variant="caption" sx={{ color: statusTokens.info.fg, fontWeight: 600 }}>
+                    Free
+                  </Typography>
+                )}
+                <TypeChip type={c.type} />
+                <IconButton
+                  className="row-actions"
+                  size="small"
+                  color="error"
+                  sx={{ opacity: 0, transition: "opacity .15s" }}
+                  title="Delete"
+                  onClick={async () => {
+                    try {
+                      await deleteContent(c._id).unwrap();
+                    } catch {
+                      toast.error("Could not delete");
+                    }
+                  }}
+                >
+                  <DeleteOutlined sx={{ fontSize: 17 }} />
+                </IconButton>
+              </Box>
+            );
+          })}
         </Box>
 
         {showUpload && (
-          <ContentUploadForm chapterId={chapter._id} onDone={() => setShowUpload(false)} />
+          <Box sx={{ px: 2, pb: 2 }}>
+            <ContentUploadForm chapterId={chapter._id} onDone={() => setShowUpload(false)} />
+          </Box>
         )}
 
         {showDoubts && (
-          <Box sx={{ mb: 2, p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}>
+          <Box sx={{ mx: 2, mb: 2, p: 2, border: `1px solid ${tokens.border}`, borderRadius: 2 }}>
             <DoubtThread doubts={doubtsRes?.data} chapter={chapter._id} canResolve />
-            <Box sx={{ mt: 1 }}>
+            <Box sx={{ mt: 1.5 }}>
               <DoubtComposer chapter={chapter._id} />
             </Box>
           </Box>
         )}
 
-        <List dense>
-          {contents.length === 0 && !isFetching && (
-            <Typography variant="body2" sx={{ color: "#6b7280", px: 2 }}>No content yet.</Typography>
-          )}
-          {contents.map((c) => (
-            <ListItem
-              key={c._id}
-              secondaryAction={
-                <IconButton edge="end" size="small" color="error" onClick={async () => {
-                  try { await deleteContent(c._id).unwrap(); } catch (e) { toast.error("Failed"); }
-                }}>
-                  <DeleteOutlined fontSize="small" />
-                </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 1,
+            px: 2,
+            py: 1.25,
+            borderTop: `1px solid ${tokens.border}`,
+            bgcolor: tokens.surfaceMuted,
+          }}
+        >
+          <Button
+            size="small"
+            startIcon={chapter.isPublished ? <VisibilityOff /> : <Visibility />}
+            onClick={togglePublish}
+          >
+            {chapter.isPublished ? "Unpublish" : "Publish"}
+          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Button
+              size="small"
+              startIcon={<QuizOutlined />}
+              onClick={() =>
+                navigate(`/app/${role}/quizzes?chapter=${chapter._id}&subject=${chapter.subject}`)
               }
             >
-              <Box sx={{ mr: 1.5, color: "#6b7280" }}>{ICON[c.type]}</Box>
-              <ListItemText
-                primary={`${c.order ? c.order + ". " : ""}${c.title}`}
-                secondary={`${c.type}${c.isFree ? " · free" : ""} · ${c.status}`}
-              />
-            </ListItem>
-          ))}
-        </List>
+              Quizzes{chapter.quizCount ? ` (${chapter.quizCount})` : ""}
+            </Button>
+            <Button size="small" startIcon={<Add />} onClick={() => setShowUpload((s) => !s)}>
+              Add topic
+            </Button>
+            <Button
+              size="small"
+              startIcon={<QuestionAnswerOutlined />}
+              onClick={() => setShowDoubts((s) => !s)}
+            >
+              Q&A
+            </Button>
+            <IconButton size="small" color="error" title="Delete chapter" onClick={removeChapter}>
+              <DeleteOutlined sx={{ fontSize: 17 }} />
+            </IconButton>
+          </Box>
+        </Box>
       </AccordionDetails>
     </Accordion>
   );

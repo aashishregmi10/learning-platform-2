@@ -3,7 +3,8 @@ import asyncHandler from "express-async-handler";
 import Doubt from "../models/Doubt.js";
 import Chapter from "../models/Chapter.js";
 import LiveClass from "../models/LiveClass.js";
-import { assertSubjectWritable } from "../utils/teacherScope.js";
+import Subject from "../models/Subject.js";
+import { assertSubjectWritable, getWritableSubjectIds } from "../utils/teacherScope.js";
 import { canAccessChapter, canAccessLiveClass } from "../utils/access.js";
 import { logActivity } from "../services/activityLogService.js";
 
@@ -133,6 +134,32 @@ export const listLiveClassDoubts = asyncHandler(async (req, res) => {
   }
   const data = await threadedList({ liveClass: liveClass._id });
   res.status(200).json({ data, message: "OK" });
+});
+
+// @route GET /api/doubts/subject/:id  (teacher/admin) — the subject's Q&A tab
+export const listSubjectDoubts = asyncHandler(async (req, res) => {
+  await assertSubjectWritable(req.user, req.params.id, res);
+  const data = await threadedList({ subject: req.params.id });
+  res.status(200).json({ data, message: "OK" });
+});
+
+// @route GET /api/doubts/mine  (teacher/admin) — every subject they can answer
+export const listMyDoubts = asyncHandler(async (req, res) => {
+  const writableIds = await getWritableSubjectIds(req.user);
+  // Admins are unrestricted, so fall back to every live subject.
+  const subjectIds =
+    writableIds ??
+    (await Subject.find({ isDeleted: false }).distinct("_id")).map((id) => id.toString());
+
+  const data = await threadedList({ subject: { $in: subjectIds } });
+  const subjects = await Subject.find({ _id: { $in: subjectIds } }).select("name");
+  const nameById = Object.fromEntries(subjects.map((s) => [s._id.toString(), s.name]));
+
+  res.status(200).json({
+    data: data.map((d) => ({ ...d, subjectName: nameById[d.subject?.toString()] })),
+    unresolvedCount: data.filter((d) => !d.isResolved).length,
+    message: "OK",
+  });
 });
 
 // @route PATCH /api/doubts/:id/resolve  (teacher/admin)

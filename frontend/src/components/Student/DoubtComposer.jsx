@@ -24,13 +24,13 @@ const DoubtComposer = ({ chapter, liveClass, parentDoubt, placeholder = "Ask a q
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder={placeholder}
-        style={{ flex: 1, padding: 8, borderRadius: 6, border: "1px solid #E7E0D4", fontFamily: "inherit" }}
+        style={{ flex: 1, padding: 8, borderRadius: 6, border: "1px solid #D4D4D8", fontFamily: "inherit" }}
         onKeyDown={(e) => e.key === "Enter" && submit()}
       />
       <button
         onClick={submit}
         disabled={isLoading}
-        style={{ background: "#2D5A3D", color: "#fff", border: 0, borderRadius: 6, padding: "8px 14px", cursor: "pointer" }}
+        style={{ background: "var(--primary)", color: "#fff", border: 0, borderRadius: 6, padding: "8px 14px", cursor: "pointer" }}
       >
         Post
       </button>

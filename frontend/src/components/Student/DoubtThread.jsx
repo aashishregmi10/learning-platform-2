@@ -1,7 +1,19 @@
 import { useState } from "react";
+import { Box, Button, Chip, Typography } from "@mui/material";
+import { ThumbUpOutlined } from "@mui/icons-material";
 
+import { statusTokens, tokens } from "../../theme";
 import { useUpvoteDoubtMutation, useResolveDoubtMutation } from "../../store/services/doubtApi";
 import DoubtComposer from "./DoubtComposer";
+
+const linkButtonSx = {
+  minWidth: 0,
+  p: 0,
+  fontSize: "0.75rem",
+  fontWeight: 500,
+  color: tokens.muted,
+  "&:hover": { background: "none", color: tokens.ink },
+};
 
 const DoubtRow = ({ doubt, chapter, liveClass, canResolve, reply = false }) => {
   const [upvote] = useUpvoteDoubtMutation();
@@ -9,52 +21,108 @@ const DoubtRow = ({ doubt, chapter, liveClass, canResolve, reply = false }) => {
   const [replying, setReplying] = useState(false);
 
   return (
-    <div style={{ marginLeft: reply ? 24 : 0, marginTop: reply ? 8 : 12, paddingTop: reply ? 0 : 12, borderTop: reply ? "none" : "1px solid #E7E0D4" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <strong style={{ fontSize: 14 }}>{doubt.author?.name}</strong>{" "}
-          <span style={{ color: "#8C7B6B", fontSize: 12 }}>{doubt.author?.role}</span>
-          <p style={{ margin: "2px 0" }}>{doubt.content}</p>
-        </div>
-        {doubt.isResolved && <span style={{ color: "#2D5A3D", fontSize: 12, fontWeight: 600 }}>✓ Resolved</span>}
-      </div>
-      <div style={{ display: "flex", gap: 12, fontSize: 12, color: "#8C7B6B" }}>
-        <button onClick={() => upvote(doubt._id)} style={{ background: "none", border: 0, color: "#8C7B6B", cursor: "pointer", padding: 0 }}>
-          👍 {doubt.upvoteCount || 0}
-        </button>
+    <Box
+      sx={{
+        ml: reply ? 3 : 0,
+        mt: reply ? 1 : 1.5,
+        pt: reply ? 0 : 1.5,
+        borderTop: reply ? "none" : `1px solid ${tokens.border}`,
+      }}
+    >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
+        <Box>
+          <Typography component="span" variant="subtitle2">
+            {doubt.author?.name}
+          </Typography>{" "}
+          <Typography component="span" variant="caption">
+            {doubt.author?.role}
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 0.25, color: tokens.body }}>
+            {doubt.content}
+          </Typography>
+        </Box>
+        {doubt.isResolved && (
+          <Chip
+            size="small"
+            label="Resolved"
+            sx={{ bgcolor: statusTokens.success.bg, color: statusTokens.success.fg, flexShrink: 0 }}
+          />
+        )}
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 2, mt: 0.75, alignItems: "center" }}>
+        <Button
+          size="small"
+          disableRipple
+          startIcon={<ThumbUpOutlined sx={{ fontSize: 14 }} />}
+          onClick={() => upvote(doubt._id)}
+          sx={linkButtonSx}
+        >
+          {doubt.upvoteCount || 0}
+        </Button>
         {!reply && (
-          <button onClick={() => setReplying((s) => !s)} style={{ background: "none", border: 0, color: "#8C7B6B", cursor: "pointer", padding: 0 }}>
+          <Button size="small" disableRipple onClick={() => setReplying((s) => !s)} sx={linkButtonSx}>
             Reply
-          </button>
+          </Button>
         )}
         {!reply && canResolve && !doubt.isResolved && (
-          <button onClick={() => resolve(doubt._id)} style={{ background: "none", border: 0, color: "#2D5A3D", cursor: "pointer", padding: 0 }}>
+          <Button
+            size="small"
+            disableRipple
+            onClick={() => resolve(doubt._id)}
+            sx={{ ...linkButtonSx, color: statusTokens.success.fg }}
+          >
             Mark resolved
-          </button>
+          </Button>
         )}
-      </div>
+      </Box>
+
       {replying && (
-        <div style={{ marginTop: 6, marginLeft: 24 }}>
-          <DoubtComposer chapter={chapter} liveClass={liveClass} parentDoubt={doubt._id} placeholder="Reply…" onDone={() => setReplying(false)} />
-        </div>
+        <Box sx={{ mt: 1, ml: 3 }}>
+          <DoubtComposer
+            chapter={chapter}
+            liveClass={liveClass}
+            parentDoubt={doubt._id}
+            placeholder="Reply…"
+            onDone={() => setReplying(false)}
+          />
+        </Box>
       )}
+
       {doubt.replies?.map((r) => (
-        <DoubtRow key={r._id} doubt={r} chapter={chapter} liveClass={liveClass} canResolve={canResolve} reply />
+        <DoubtRow
+          key={r._id}
+          doubt={r}
+          chapter={chapter}
+          liveClass={liveClass}
+          canResolve={canResolve}
+          reply
+        />
       ))}
-    </div>
+    </Box>
   );
 };
 
-const DoubtThread = ({ doubts, chapter, liveClass, canResolve = false }) => {
+const DoubtThread = ({ doubts, chapter, liveClass, canResolve = false, emptyText }) => {
   if (!doubts || doubts.length === 0) {
-    return <p style={{ color: "#8C7B6B", fontSize: 14 }}>No doubts yet — ask the first question.</p>;
+    return (
+      <Typography variant="body2" sx={{ color: tokens.muted }}>
+        {emptyText || "No questions yet — ask the first one."}
+      </Typography>
+    );
   }
   return (
-    <div>
+    <Box>
       {doubts.map((d) => (
-        <DoubtRow key={d._id} doubt={d} chapter={chapter} liveClass={liveClass} canResolve={canResolve} />
+        <DoubtRow
+          key={d._id}
+          doubt={d}
+          chapter={chapter}
+          liveClass={liveClass}
+          canResolve={canResolve}
+        />
       ))}
-    </div>
+    </Box>
   );
 };
 

@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Chip, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../components/Shared/AppTable";
+import StatusChip from "../../../components/Shared/StatusChip";
+import { tokens } from "../../../theme";
 import { useTablePagination } from "../../../hooks/useTablePagination";
 import { useGetSubjectsQuery } from "../../../store/services/subjectApi";
 
@@ -22,7 +24,7 @@ const TeacherSubjectsScreen = () => {
       name: "Subject",
       grow: 2,
       cell: (r) => (
-        <Link to={`/app/teacher/subjects/${r._id}`} style={{ color: "#1976d3", fontWeight: 600, textDecoration: "none" }}>
+        <Link to={`/app/teacher/subjects/${r._id}`} style={{ color: tokens.ink, fontWeight: 600, textDecoration: "none" }}>
           {r.name}
         </Link>
       ),
@@ -32,14 +34,14 @@ const TeacherSubjectsScreen = () => {
     { name: "Chapters", selector: (r) => r.totalChapters ?? 0, width: "110px" },
     {
       name: "Status",
-      cell: (r) => <Chip size="small" label={r.isActive ? "Active" : "Draft"} color={r.isActive ? "success" : "default"} />,
+      cell: (r) => <StatusChip active={r.isActive} />,
       width: "110px",
     },
     { name: "Price", selector: (r) => money(r.pricing?.discountedPrice), width: "130px" },
     {
       name: "",
       cell: (r) => (
-        <IconButton size="small" title="Open" onClick={() => navigate(`/app/teacher/subjects/${r._id}`)}>
+        <IconButton size="small" color="primary" title="Open" onClick={() => navigate(`/app/teacher/subjects/${r._id}`)}>
           <InfoOutlined fontSize="small" />
         </IconButton>
       ),
@@ -53,8 +55,8 @@ const TeacherSubjectsScreen = () => {
       <BreadcrumbLayout.Error error={error} />
       {!isFetching && (data?.data ?? []).length === 0 ? (
         <BreadcrumbLayout.Paper>
-          <div style={{ padding: 40, textAlign: "center", color: "#6b7280" }}>
-            No subjects assigned to you yet. Ask an admin to assign you subjects to start authoring content.
+          <div style={{ padding: 40, textAlign: "center", color: tokens.muted }}>
+            Nothing assigned yet — ask an admin to give you a subject and you can start writing chapters.
           </div>
         </BreadcrumbLayout.Paper>
       ) : (

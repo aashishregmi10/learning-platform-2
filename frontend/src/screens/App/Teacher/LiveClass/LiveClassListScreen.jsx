@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Button, Chip, IconButton } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 import { Add, CancelOutlined, PlayArrowOutlined, StopOutlined, VisibilityOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
+import StatusBadge from "../../../../components/Shared/StatusBadge";
 import { useTablePagination } from "../../../../hooks/useTablePagination";
 import { useAuth } from "../../../../hooks/useAuth";
 import {
@@ -13,8 +14,6 @@ import {
   useEndLiveClassMutation,
   useCancelLiveClassMutation,
 } from "../../../../store/services/liveClassApi";
-
-const STATUS_COLOR = { scheduled: "default", live: "success", ended: "info", cancelled: "error" };
 
 const LiveClassListScreen = () => {
   const { role } = useAuth();
@@ -40,23 +39,23 @@ const LiveClassListScreen = () => {
     { name: "Duration", selector: (r) => `${r.duration} min`, width: "100px" },
     {
       name: "Status",
-      cell: (r) => <Chip size="small" label={r.status} color={STATUS_COLOR[r.status]} />,
+      cell: (r) => <StatusBadge status={r.status} />,
       width: "120px",
     },
     {
       name: "Actions",
       cell: (r) => (
         <>
-          <IconButton size="small" title="Detail" onClick={() => navigate(`/app/${role}/live-classes/${r._id}`)}>
+          <IconButton size="small" color="primary" title="Detail" onClick={() => navigate(`/app/${role}/live-classes/${r._id}`)}>
             <VisibilityOutlined fontSize="small" />
           </IconButton>
           {r.status === "scheduled" && (
-            <IconButton size="small" title="Start" onClick={() => act(startLiveClass, r._id, "Class started")}>
+            <IconButton size="small" color="success" title="Start" onClick={() => act(startLiveClass, r._id, "Class started")}>
               <PlayArrowOutlined fontSize="small" />
             </IconButton>
           )}
           {r.status === "live" && (
-            <IconButton size="small" title="End" onClick={() => act(endLiveClass, r._id, "Class ended")}>
+            <IconButton size="small" color="error" title="End" onClick={() => act(endLiveClass, r._id, "Class ended")}>
               <StopOutlined fontSize="small" />
             </IconButton>
           )}
@@ -76,7 +75,7 @@ const LiveClassListScreen = () => {
     <BreadcrumbLayout
       breadcrumbs={[{ title: "Live Classes" }]}
       headerActions={
-        <Button component={Link} to={`/app/${role}/live-classes/create`} startIcon={<Add />} variant="contained" sx={{ bgcolor: "#1976d3" }}>
+        <Button component={Link} to={`/app/${role}/live-classes/create`} startIcon={<Add />} variant="contained">
           Schedule Class
         </Button>
       }

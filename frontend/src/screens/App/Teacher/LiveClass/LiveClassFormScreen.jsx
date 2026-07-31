@@ -104,7 +104,7 @@ const LiveClassFormScreen = () => {
           <TextField sx={{ gridColumn: "1 / -1" }} multiline minRows={2} size="small" label="Description" value={form.description} onChange={set("description")} />
           <Box sx={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end", gap: 1 }}>
             <Button onClick={backTo}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#1976d3" }}>{isEdit ? "Update" : "Schedule"}</Button>
+            <Button type="submit" variant="contained">{isEdit ? "Update" : "Schedule"}</Button>
           </Box>
         </Box>
       </BreadcrumbLayout.Paper>

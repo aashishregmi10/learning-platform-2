@@ -6,9 +6,10 @@ import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 import PageHeader from "../../../components/Student/PageHeader";
 import EmptyState from "../../../components/Student/EmptyState";
 import InfoCard from "../../../components/Student/InfoCard";
+import { roleFor } from "../../../utils/statusRole";
+import { tokens } from "../../../theme";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
-const STATUS_COLOR = { paid: "#2e7d32", pending: "#ed6c02", failed: "#d32f2f", refunded: "#6b7280" };
 const fmt = (d) => new Date(d).toLocaleDateString();
 
 const OrdersScreen = () => {
@@ -35,8 +36,8 @@ const OrdersScreen = () => {
             <InfoCard
               key={o._id}
               to={`/app/student/orders/${o._id}`}
-              pills={[{ label: o.status, tone: "solid", color: STATUS_COLOR[o.status] || "#6b7280" }]}
-              icon={<ReceiptLongOutlined sx={{ fontSize: 30, color: "#c3c9d1" }} />}
+              pills={[{ label: o.status, role: roleFor(o.status) }]}
+              icon={<ReceiptLongOutlined sx={{ fontSize: 30, color: tokens.faint }} />}
               title={o.items.map((i) => i.title).join(", ")}
               meta={<span style={{ fontSize: 12, color: "var(--muted)", fontFamily: "monospace" }}>{o.invoiceNumber || o._id} · {fmt(o.createdAt)}</span>}
               footerLeft={<span style={{ fontFamily: "monospace" }}>{money(o.totalAmount)}</span>}

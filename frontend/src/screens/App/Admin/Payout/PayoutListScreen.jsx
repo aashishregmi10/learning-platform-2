@@ -2,16 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, TextField, IconButton,
+  Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, IconButton,
 } from "@mui/material";
 import { CalculateOutlined, VisibilityOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
+import StatusBadge from "../../../../components/Shared/StatusBadge";
 import { useTablePagination } from "../../../../hooks/useTablePagination";
 import { useListPayoutsQuery, useComputePayoutsMutation } from "../../../../store/services/payoutApi";
-
-const STATUS_COLOR = { pending: "default", processing: "info", paid: "success", failed: "error" };
 
 const PayoutListScreen = () => {
   const navigate = useNavigate();
@@ -37,11 +36,11 @@ const PayoutListScreen = () => {
     { name: "Period", selector: (r) => `${new Date(r.periodStart).toLocaleDateString()} – ${new Date(r.periodEnd).toLocaleDateString()}`, grow: 1.5 },
     { name: "Revenue (NPR)", selector: (r) => r.attributedRevenue?.toLocaleString(), width: "130px" },
     { name: "Payout (NPR)", selector: (r) => r.payoutAmount?.toLocaleString(), width: "130px" },
-    { name: "Status", cell: (r) => <Chip size="small" label={r.status} color={STATUS_COLOR[r.status]} />, width: "120px" },
+    { name: "Status", cell: (r) => <StatusBadge status={r.status} />, width: "120px" },
     {
       name: "Actions",
       cell: (r) => (
-        <IconButton size="small" onClick={() => navigate(`/app/admin/payouts/${r._id}`)}>
+        <IconButton size="small" color="primary" onClick={() => navigate(`/app/admin/payouts/${r._id}`)}>
           <VisibilityOutlined fontSize="small" />
         </IconButton>
       ),
@@ -55,7 +54,7 @@ const PayoutListScreen = () => {
       breadcrumbs={[{ title: "Payouts" }]}
       isBusy={isFetching}
       headerActions={
-        <Button startIcon={<CalculateOutlined />} variant="contained" sx={{ bgcolor: "#1976d3" }} onClick={() => setOpen(true)}>
+        <Button startIcon={<CalculateOutlined />} variant="contained" onClick={() => setOpen(true)}>
           Compute Payouts
         </Button>
       }
@@ -83,7 +82,7 @@ const PayoutListScreen = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" sx={{ bgcolor: "#1976d3" }} disabled={computing} onClick={compute}>Compute</Button>
+          <Button variant="contained" disabled={computing} onClick={compute}>Compute</Button>
         </DialogActions>
       </Dialog>
     </BreadcrumbLayout>

@@ -41,7 +41,7 @@ const PublicCatalogScreen = () => {
             <h2 style={{ margin: 0, fontSize: 20 }}>{year.yearName}</h2>
             {year.bundlePrice && (
               <span style={{ fontSize: 13, color: "var(--muted)" }}>
-                Full-year bundle: <strong style={{ color: "#1C1C1C", fontFamily: "monospace" }}>{money(year.bundlePrice.discountedPrice)}</strong>
+                Full-year bundle: <strong style={{ color: "#171717", fontFamily: "monospace" }}>{money(year.bundlePrice.discountedPrice)}</strong>
               </span>
             )}
           </div>

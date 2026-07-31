@@ -12,7 +12,13 @@ const UserSchema = new Schema(
       enum: ["google", "password"],
       required: true,
     },
+    // `name` stays the single source for display and search. Staff accounts are
+    // created from parts, so those are kept alongside it; Google students only
+    // ever hand us a full name, hence the parts are optional.
     name: { type: String, required: true },
+    firstName: { type: String, trim: true },
+    middleName: { type: String, trim: true },
+    surname: { type: String, trim: true },
     avatar: { type: String },
 
     role: {

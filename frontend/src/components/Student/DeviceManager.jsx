@@ -42,7 +42,7 @@ const DeviceManager = () => {
             </span>
             <button
               onClick={() => kick(d.deviceId)}
-              style={{ background: "transparent", color: "#b3261e", border: "1px solid #b3261e", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+              style={{ background: "transparent", color: "var(--status-danger-fg)", border: "1px solid var(--status-danger-solid)", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}
             >
               Sign out
             </button>

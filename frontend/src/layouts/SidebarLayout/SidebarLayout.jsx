@@ -18,11 +18,13 @@ import { Menu as MenuIcon, Logout } from "@mui/icons-material";
 
 import { useAuth } from "../../hooks/useAuth";
 import { removeUser } from "../../store/authSlice";
+import { statusTokens, tokens } from "../../theme";
 import NotificationBell from "../../components/Shared/NotificationBell";
 
 const drawerWidth = 250;
 
-// Slot-based dashboard shell (admin/teacher). `sidebar` is the role sidebar.
+// Slot-based dashboard shell (admin/teacher/student). `sidebar` is the role
+// sidebar. Everything is white-on-hairline — no shadows, no colour chrome.
 const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -36,15 +38,15 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
   };
 
   const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: "#1976d3" }}>
+    <Box sx={{ height: "100%", bgcolor: tokens.surface }}>
+      <Toolbar sx={{ px: 2.5 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: "1rem", color: statusTokens.info.fg }}>
           {title}
         </Typography>
       </Toolbar>
       <Divider />
       {Sidebar && <Sidebar />}
-    </div>
+    </Box>
   );
 
   return (
@@ -56,9 +58,9 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          bgcolor: "#fff",
-          color: "#1C1C1C",
-          borderBottom: "1px solid #e0e0e0",
+          bgcolor: tokens.surface,
+          color: tokens.ink,
+          borderBottom: `1px solid ${tokens.border}`,
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
@@ -73,7 +75,10 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
           <Box sx={{ flexGrow: 1 }} />
           {loggedInUser && <NotificationBell />}
           <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-            <Avatar src={loggedInUser?.avatar} sx={{ width: 32, height: 32 }}>
+            <Avatar
+              src={loggedInUser?.avatar}
+              sx={{ width: 32, height: 32, bgcolor: statusTokens.info.solid, fontSize: "0.85rem" }}
+            >
               {loggedInUser?.name?.[0]}
             </Avatar>
           </IconButton>
@@ -97,7 +102,7 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": { width: drawerWidth },
+            "& .MuiDrawer-paper": { width: drawerWidth, borderColor: tokens.border },
           }}
         >
           {drawer}
@@ -107,7 +112,10 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
           open
           sx={{
             display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": { width: drawerWidth, borderRight: "1px solid #e0e0e0" },
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              borderRight: `1px solid ${tokens.border}`,
+            },
           }}
         >
           {drawer}
@@ -116,7 +124,12 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
 
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, bgcolor: "#f5f5f5" }}
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          bgcolor: tokens.canvas,
+        }}
       >
         <Toolbar />
         <Outlet />

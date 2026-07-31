@@ -32,20 +32,20 @@ const NotificationBell = () => {
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)} slotProps={{ paper: { sx: { width: 340 } } }}>
         {notifications.length === 0 && (
           <MenuItem disabled>
-            <Typography variant="body2" sx={{ color: "#6b7280" }}>Nothing here yet.</Typography>
+            <Typography variant="body2" sx={{ color: "#71717A" }}>Nothing here yet.</Typography>
           </MenuItem>
         )}
         {notifications.map((n) => (
           <MenuItem key={n._id} onClick={() => openOne(n)} sx={{ whiteSpace: "normal", opacity: n.isRead ? 0.6 : 1 }}>
             <Box>
               <Typography variant="body2" sx={{ fontWeight: n.isRead ? 400 : 700 }}>{n.title}</Typography>
-              <Typography variant="caption" sx={{ color: "#6b7280" }}>{n.message}</Typography>
+              <Typography variant="caption" sx={{ color: "#71717A" }}>{n.message}</Typography>
             </Box>
           </MenuItem>
         ))}
         <Divider />
         <MenuItem onClick={() => { setAnchorEl(null); navigate(`/app/${role}/notifications`); }}>
-          <Typography variant="body2" sx={{ color: "#1976d3" }}>See all notifications</Typography>
+          <Typography variant="body2" sx={{ color: "#171717" }}>See all notifications</Typography>
         </MenuItem>
       </Menu>
     </>

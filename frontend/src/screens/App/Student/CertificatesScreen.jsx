@@ -25,7 +25,7 @@ const CertificatesScreen = () => {
         )}
         {!isLoading && certificates.length === 0 && (
           <EmptyState
-            icon={<WorkspacePremiumOutlined fontSize="inherit" sx={{ color: "var(--student-gold)" }} />}
+            icon={<WorkspacePremiumOutlined fontSize="inherit" sx={{ color: "var(--status-warning-solid)" }} />}
             title="Nothing here yet"
             subtitle="Complete every chapter of a subject to earn your first certificate."
           />

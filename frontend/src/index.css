@@ -1,21 +1,55 @@
 /* Montserrat — mirrors can-logistic's global font */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
+/* Mirrors src/theme.js — keep the two in step. Grey and white throughout;
+   colour is reserved for status, never for chrome. */
 :root {
-  --primary: #1976d3;
-  --primary-accent: #edf5ff;
-  --background: #fafafa;
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
+  --primary-accent: #eaf2ff;
+  --ink: #171717;
+  --background: #fbfbfc;
+  --surface-muted: #f7f7f8;
   --white: #ffffff;
-  --success: #66bb6a;
-  --success-accent: #defbe6;
-  --border: #e0e0e0;
-  --muted: #6b7280;
+  --success: #16a34a;
+  --success-accent: #e7f6ec;
+  --danger: #dc2626;
+  --danger-accent: #fee9e9;
+  --warning: #d97706;
+  --warning-accent: #fef3e2;
+  --info: #2563eb;
+  --info-accent: #eaf2ff;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d8;
+  --muted: #71717a;
+  --faint: #a1a1aa;
 
-  /* Student paid-area accent — blue = structural/CTA (matches reference), gold = rating/achievement only */
-  --student-ink: #4c8dfb;
-  --student-ink-2: #2f6fed;
-  --student-gold: #c9962b;
-  --student-gold-soft: #fbf1dc;
+  /* Semantic status roles — mirrors statusTokens in src/theme.js. Keep in step.
+     Colour only ever means good / attention / bad / info / no-judgement. */
+  --status-info-bg: #eaf2ff;
+  --status-info-fg: #1d4ed8;
+  --status-info-solid: #2563eb;
+
+  --status-success-bg: #e7f6ec;
+  --status-success-fg: #166534;
+  --status-success-solid: #16a34a;
+
+  --status-warning-bg: #fef3e2;
+  --status-warning-fg: #b45309;
+  --status-warning-solid: #d97706;
+
+  --status-danger-bg: #fee9e9;
+  --status-danger-fg: #b91c1c;
+  --status-danger-solid: #dc2626;
+
+  --status-neutral-bg: #f4f4f5;
+  --status-neutral-fg: #52525b;
+  --status-neutral-solid: #71717a;
+
+  /* Student paid-area accent — the same accent blue as the rest of the app, so
+     headers, gradients and CTAs there match the admin/teacher chrome. */
+  --student-ink: #2563eb;
+  --student-ink-2: #1d4ed8;
 }
 
 * {
@@ -36,7 +70,7 @@ body,
 body {
   font-size: 16px;
   background: var(--background);
-  color: #1c1c1c;
+  color: #171717;
 }
 
 a {
@@ -49,5 +83,6 @@ a {
 }
 .guest-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(25, 118, 211, 0.12);
+  border-color: var(--border-strong);
+  box-shadow: 0 6px 18px rgba(23, 23, 23, 0.06);
 }

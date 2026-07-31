@@ -4,6 +4,7 @@ import { Add, EditOutlined, MenuBookOutlined } from "@mui/icons-material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import AppTable from "../../../../components/Shared/AppTable";
+import StatusChip from "../../../../components/Shared/StatusChip";
 import { useTablePagination } from "../../../../hooks/useTablePagination";
 import { useGetProgramsQuery } from "../../../../store/services/programApi";
 
@@ -15,22 +16,34 @@ const ProgramListScreen = () => {
   const columns = [
     { name: "Name", selector: (r) => r.name, sortable: true, grow: 2 },
     { name: "Code", selector: (r) => r.code || "—", width: "110px" },
-    { name: "Years", selector: (r) => r.durationYears, width: "90px" },
+    {
+      name: "Structure",
+      cell: (r) => (
+        <Chip
+          size="small"
+          variant="outlined"
+          label={
+            r.structure === "semester"
+              ? `Semester · ${r.semestersPerYear || 2}/yr`
+              : "Yearly"
+          }
+        />
+      ),
+      width: "160px",
+    },
     {
       name: "Status",
-      cell: (r) => (
-        <Chip size="small" label={r.isActive ? "Active" : "Draft"} color={r.isActive ? "success" : "default"} />
-      ),
+      cell: (r) => <StatusChip active={r.isActive} />,
       width: "120px",
     },
     {
       name: "Actions",
       cell: (r) => (
         <>
-          <IconButton size="small" title="Years" onClick={() => navigate(`/app/admin/catalog/years?program=${r._id}`)}>
+          <IconButton size="small" color="primary" title="Years" onClick={() => navigate(`/app/admin/catalog/years?program=${r._id}`)}>
             <MenuBookOutlined fontSize="small" />
           </IconButton>
-          <IconButton size="small" title="Edit" onClick={() => navigate(`/app/admin/catalog/programs/${r._id}/edit`)}>
+          <IconButton size="small" color="primary" title="Edit" onClick={() => navigate(`/app/admin/catalog/programs/${r._id}/edit`)}>
             <EditOutlined fontSize="small" />
           </IconButton>
         </>
@@ -43,7 +56,7 @@ const ProgramListScreen = () => {
     <BreadcrumbLayout
       breadcrumbs={[{ title: "Catalog" }, { title: "Programs" }]}
       headerActions={
-        <Button component={Link} to="/app/admin/catalog/programs/create" startIcon={<Add />} variant="contained" sx={{ bgcolor: "#1976d3" }}>
+        <Button component={Link} to="/app/admin/catalog/programs/create" startIcon={<Add />} variant="contained">
           New Program
         </Button>
       }

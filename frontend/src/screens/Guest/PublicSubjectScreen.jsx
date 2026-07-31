@@ -63,7 +63,7 @@ const PublicSubjectScreen = () => {
       <div
         style={{
           borderRadius: 16, overflow: "hidden", margin: "14px 0 20px", padding: "28px 28px",
-          background: "linear-gradient(120deg, #10365e 0%, #1976d3 70%)", color: "#fff",
+          background: "linear-gradient(120deg, #1D4ED8 0%, #2563EB 100%)", color: "#fff",
         }}
       >
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", background: "rgba(255,255,255,0.18)", borderRadius: 20, padding: "3px 12px" }}>
@@ -74,9 +74,9 @@ const PublicSubjectScreen = () => {
       </div>
 
       {subject.entitled ? (
-        <div style={{ background: "var(--success-accent)", border: "1px solid var(--success)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "#2e7d32", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ background: "var(--status-success-bg)", border: "1px solid var(--status-success-solid)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "var(--status-success-fg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontWeight: 600 }}>✓ You're already enrolled in this subject.</span>
-          <Link to={`/app/student/subjects/${subject._id}`} style={{ color: "#2e7d32", fontWeight: 600 }}>Continue learning →</Link>
+          <Link to={`/app/student/subjects/${subject._id}`} style={{ color: "var(--status-success-fg)", fontWeight: 600 }}>Continue learning →</Link>
         </div>
       ) : (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-accent)", border: "1px solid var(--primary)", borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
@@ -92,27 +92,27 @@ const PublicSubjectScreen = () => {
         <Skeleton key={i} variant="rounded" height={90} sx={{ borderRadius: "10px", mb: 2 }} />
       ))}
       {chapters.map((ch) => (
-        <section key={ch._id} style={{ marginBottom: 20, border: "1px solid #e0e0e0", borderRadius: 10, overflow: "hidden" }}>
-          <div style={{ padding: "12px 16px", background: "#f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <section key={ch._id} style={{ marginBottom: 20, border: "1px solid #E5E5E5", borderRadius: 10, overflow: "hidden" }}>
+          <div style={{ padding: "12px 16px", background: "#F7F7F8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <strong>{ch.chapterNumber}. {ch.title}</strong>
-            {ch.isFreePreview && <span style={{ fontSize: 12, color: "#1976d3", fontWeight: 600 }}>Free preview</span>}
+            {ch.isFreePreview && <span style={{ fontSize: 12, color: "#171717", fontWeight: 600 }}>Free preview</span>}
           </div>
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {ch.items.map((item) => (
-              <li key={item._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #eeeeee" }}>
-                <span style={{ color: item.locked ? "#9e9e9e" : "#1C1C1C" }}>{TYPE_LABEL[item.type]} &nbsp; {item.title}</span>
+              <li key={item._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #E5E5E5" }}>
+                <span style={{ color: item.locked ? "var(--faint)" : "#171717" }}>{TYPE_LABEL[item.type]} &nbsp; {item.title}</span>
                 {item.locked ? (
-                  <span title="Purchase required" style={{ color: "#9e9e9e", fontSize: 13 }}>🔒 Locked</span>
+                  <span title="Purchase required" style={{ color: "var(--faint)", fontSize: 13 }}>🔒 Locked</span>
                 ) : (
-                  <span style={{ color: "#2D5A3D", fontSize: 13 }}>Free preview</span>
+                  <span style={{ color: "#15803D", fontSize: 13 }}>Free preview</span>
                 )}
               </li>
             ))}
-            {ch.items.length === 0 && <li style={{ padding: "10px 16px", color: "#6b7280" }}>No content yet.</li>}
+            {ch.items.length === 0 && <li style={{ padding: "10px 16px", color: "#71717A" }}>No content yet.</li>}
             {ch.quizzes?.map((q) => (
-              <li key={q._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #eeeeee", background: "#fffdf5" }}>
-                <span style={{ color: q.locked ? "#9e9e9e" : "#1C1C1C" }}>📝 Quiz &nbsp; {q.title}</span>
-                {q.locked && <span title="Purchase required" style={{ color: "#9e9e9e", fontSize: 13 }}>🔒 Locked</span>}
+              <li key={q._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #E5E5E5", background: "var(--surface-muted)" }}>
+                <span style={{ color: q.locked ? "var(--faint)" : "#171717" }}>📝 Quiz &nbsp; {q.title}</span>
+                {q.locked && <span title="Purchase required" style={{ color: "var(--faint)", fontSize: 13 }}>🔒 Locked</span>}
               </li>
             ))}
           </ul>

@@ -1,46 +1,80 @@
 import { Link } from "react-router-dom";
-import { Alert, CircularProgress, Paper } from "@mui/material";
+import { Alert, Box, CircularProgress, Paper, Typography } from "@mui/material";
 
-// Compound layout used by every admin/teacher screen (mirrors can-logistic).
+import { tokens } from "../../theme";
+
+// Compound layout used by every admin/teacher screen.
 export const BreadcrumbLayout = ({
   children,
   isBusy = false,
   breadcrumbs = [],
   headerActions = null,
 }) => (
-  <div className="breadcrumb-layout" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <Paper
       variant="outlined"
-      sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, py: 1.5 }}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 2,
+        flexWrap: "wrap",
+        px: 2,
+        py: 1.5,
+        borderRadius: 2.5,
+      }}
     >
-      <nav aria-label="breadcrumb" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      <Box
+        component="nav"
+        aria-label="breadcrumb"
+        sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}
+      >
         {breadcrumbs.map((crumb, i) => {
           const last = i === breadcrumbs.length - 1;
           return (
-            <span key={i} style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+            <Box key={i} sx={{ display: "inline-flex", gap: 1, alignItems: "center" }}>
               {crumb.path && !last ? (
-                <Link to={crumb.path} style={{ color: "#1976d3", textDecoration: "none" }}>
+                <Typography
+                  component={Link}
+                  to={crumb.path}
+                  variant="body2"
+                  sx={{
+                    color: tokens.muted,
+                    textDecoration: "none",
+                    "&:hover": { color: tokens.ink },
+                  }}
+                >
                   {crumb.title}
-                </Link>
+                </Typography>
               ) : (
-                <span style={{ color: last ? "#1C1C1C" : "#6b7280", fontWeight: last ? 600 : 400 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: last ? tokens.ink : tokens.muted, fontWeight: last ? 600 : 400 }}
+                >
                   {crumb.title}
-                </span>
+                </Typography>
               )}
-              {!last && <span style={{ color: "#6b7280" }}>/</span>}
-            </span>
+              {!last && (
+                <Typography variant="body2" sx={{ color: tokens.faint }}>
+                  /
+                </Typography>
+              )}
+            </Box>
           );
         })}
-      </nav>
-      {isBusy ? <CircularProgress size={22} thickness={5} /> : headerActions}
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        {isBusy && <CircularProgress size={18} thickness={5} />}
+        {headerActions}
+      </Box>
     </Paper>
     {children}
-  </div>
+  </Box>
 );
 
 BreadcrumbLayout.Paper = function BLPaper({ children, ...props }) {
   return (
-    <Paper variant="outlined" sx={{ p: 0 }} {...props}>
+    <Paper variant="outlined" sx={{ p: 0, borderRadius: 2.5 }} {...props}>
       {children}
     </Paper>
   );
@@ -49,11 +83,7 @@ BreadcrumbLayout.Paper = function BLPaper({ children, ...props }) {
 BreadcrumbLayout.Error = function BLError({ error }) {
   if (!error) return null;
   const message = error?.data?.message || error?.error || "Something went wrong";
-  return (
-    <Alert severity="error" variant="outlined">
-      {message}
-    </Alert>
-  );
+  return <Alert severity="error">{message}</Alert>;
 };
 
 export default BreadcrumbLayout;

@@ -77,7 +77,7 @@ const HomeScreen = () => {
       <section
         style={{
           borderRadius: 20, overflow: "hidden", marginBottom: 48,
-          background: "linear-gradient(120deg, #10365e 0%, #1976d3 55%, #2D5A3D 130%)",
+          background: "linear-gradient(120deg, #1D4ED8 0%, #2563EB 55%, #171717 130%)",
           padding: "48px 40px", display: "flex", flexWrap: "wrap", gap: 32, alignItems: "center",
         }}
       >
@@ -143,7 +143,7 @@ const HomeScreen = () => {
               <h3 style={{ margin: 0, fontSize: 20 }}>{year.yearName}</h3>
               {year.bundlePrice && (
                 <span style={{ fontSize: 13, color: "var(--muted)" }}>
-                  Full-year bundle: <strong style={{ color: "#1C1C1C", fontFamily: "monospace" }}>{money(year.bundlePrice.discountedPrice)}</strong>
+                  Full-year bundle: <strong style={{ color: "#171717", fontFamily: "monospace" }}>{money(year.bundlePrice.discountedPrice)}</strong>
                 </span>
               )}
             </div>

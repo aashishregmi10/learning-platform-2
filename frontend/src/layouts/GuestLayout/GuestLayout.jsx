@@ -17,8 +17,8 @@ const GuestLayout = () => (
         B.Sc Nepal
       </Link>
       <nav style={{ display: "flex", gap: 20, alignItems: "center" }}>
-        <Link to="/" style={{ textDecoration: "none", color: "#1C1C1C", fontSize: 14, fontWeight: 500 }}>Browse Courses</Link>
-        <Link to="/verify" style={{ textDecoration: "none", color: "#1C1C1C", fontSize: 14, fontWeight: 500 }}>Verify Certificate</Link>
+        <Link to="/" style={{ textDecoration: "none", color: "#171717", fontSize: 14, fontWeight: 500 }}>Browse Courses</Link>
+        <Link to="/verify" style={{ textDecoration: "none", color: "#171717", fontSize: 14, fontWeight: 500 }}>Verify Certificate</Link>
         <Link
           to="/login"
           style={{ textDecoration: "none", background: "var(--primary)", color: "#fff", borderRadius: 6, padding: "8px 18px", fontWeight: 700, fontSize: 14 }}

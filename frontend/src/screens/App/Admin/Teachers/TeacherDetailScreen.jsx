@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Autocomplete, Box, Button, Chip, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, TextField, Typography } from "@mui/material";
 
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
+import StatusChip from "../../../../components/Shared/StatusChip";
+import { tokens } from "../../../../theme";
 import { useGetTeacherQuery, useUpdateTeacherSubjectsMutation } from "../../../../store/services/userApi";
 import { useGetSubjectsQuery } from "../../../../store/services/subjectApi";
 
 const Field = ({ label, value }) => (
   <Box>
-    <Typography variant="caption" sx={{ color: "#6b7280", textTransform: "uppercase" }}>{label}</Typography>
+    <Typography variant="caption" sx={{ color: tokens.muted, textTransform: "uppercase" }}>{label}</Typography>
     <Typography>{value || "—"}</Typography>
   </Box>
 );
@@ -56,16 +58,16 @@ const TeacherDetailScreen = () => {
               <Field label="Qualification" value={profile?.qualification} />
               <Field label="Specialization" value={profile?.specialization} />
               <Box>
-                <Typography variant="caption" sx={{ color: "#6b7280", textTransform: "uppercase" }}>Status</Typography>
+                <Typography variant="caption" sx={{ color: tokens.muted, textTransform: "uppercase" }}>Status</Typography>
                 <Box sx={{ mt: 0.5 }}>
-                  <Chip size="small" label={profile?.isApproved ? "Approved" : "Pending approval"} color={profile?.isApproved ? "success" : "warning"} />
+                  <StatusChip active={!!profile?.isApproved} labels={["Approved", "Pending approval"]} />
                 </Box>
               </Box>
             </Box>
 
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>Assigned subjects</Typography>
-              <Typography variant="body2" sx={{ color: "#6b7280", mb: 2 }}>
+              <Typography variant="body2" sx={{ color: tokens.muted, mb: 2 }}>
                 This teacher can only author content and run live classes for the subjects assigned here.
               </Typography>
               <Autocomplete
@@ -80,7 +82,7 @@ const TeacherDetailScreen = () => {
                 renderInput={(params) => <TextField {...params} label="Subjects" placeholder="Select subjects to teach" />}
               />
               <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
-                <Button variant="contained" disabled={saving} onClick={save} sx={{ bgcolor: "#1976d3" }}>
+                <Button variant="contained" disabled={saving} onClick={save}>
                   {saving ? "Saving…" : "Save assignments"}
                 </Button>
               </Box>
