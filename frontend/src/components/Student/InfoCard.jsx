@@ -5,7 +5,7 @@ import { statusTokens, tokens } from "../../theme";
 
 /**
  * Shared two-tone card shell used across Catalog/Subscriptions/Orders/
- * Certificates/Live Classes: grey top zone (pills + icon), white bottom zone
+ * Live Classes: grey top zone (pills + icon), white bottom zone
  * (meta line, title, divider, footer row).
  *
  * Pills take `{ label, role }` where role is one of the five status roles.

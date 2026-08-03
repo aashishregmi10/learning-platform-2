@@ -2,7 +2,6 @@ import {
   HomeOutlined,
   CardMembershipOutlined,
   ReceiptLongOutlined,
-  WorkspacePremiumOutlined,
   VideocamOutlined,
 } from "@mui/icons-material";
 
@@ -28,12 +27,6 @@ const STUDENT_MENU = [
     path: "/app/student/orders",
     icon: <ReceiptLongOutlined />,
     color: statusTokens.warning.solid,
-  },
-  {
-    title: "Certificates",
-    path: "/app/student/certificates",
-    icon: <WorkspacePremiumOutlined />,
-    color: statusTokens.success.solid,
   },
   {
     title: "Live Classes",

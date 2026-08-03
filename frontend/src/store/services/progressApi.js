@@ -8,7 +8,7 @@ export const progressApi = baseApi.injectEndpoints({
     }),
     saveProgress: builder.mutation({
       query: (body) => ({ url: "/progress", method: "PUT", body }),
-      invalidatesTags: ["Progress", "Certificate"],
+      invalidatesTags: ["Progress"],
     }),
   }),
 });

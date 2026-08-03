@@ -1,42 +1,31 @@
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Box, Button, Divider, Skeleton, Typography } from "@mui/material";
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-import {
-  ExpandMoreOutlined,
-  PlayCircleOutlined,
-  PictureAsPdfOutlined,
-  NotesOutlined,
-  LinkOutlined,
-  HeadphonesOutlined,
-  QuizOutlined,
+  ArrowBackOutlined,
+  ArrowForwardOutlined,
   CheckCircle,
-  LockOutlined,
+  CheckCircleOutlineOutlined,
   ForumOutlined,
-  CloseOutlined,
+  LockOutlined,
+  OpenInNewOutlined,
+  PictureAsPdfOutlined,
+  QuizOutlined,
 } from "@mui/icons-material";
 
 import { useGetSubjectContentQuery } from "../../../store/services/catalogApi";
 import { useLazyPlayContentQuery } from "../../../store/services/contentApi";
-import { useGetSubjectProgressQuery, useSaveProgressMutation } from "../../../store/services/progressApi";
-import { useGetCertificateStatusQuery } from "../../../store/services/certificateApi";
+import {
+  useGetSubjectProgressQuery,
+  useSaveProgressMutation,
+} from "../../../store/services/progressApi";
 import { useGetSubjectReviewsQuery } from "../../../store/services/reviewApi";
 import { useGetChapterDoubtsQuery } from "../../../store/services/doubtApi";
+import { statusTokens, tokens } from "../../../theme";
 import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
+import RichText from "../../../components/Shared/RichText";
+import LessonRail from "../../../components/Student/LessonRail";
 import VideoPlayer from "../../../components/Student/VideoPlayer";
 import RatingSummary from "../../../components/Student/RatingSummary";
 import ReviewList from "../../../components/Student/ReviewList";
@@ -46,35 +35,37 @@ import DoubtComposer from "../../../components/Student/DoubtComposer";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
-const TYPE_ICON = {
-  video: <PlayCircleOutlined fontSize="small" />,
-  pdf: <PictureAsPdfOutlined fontSize="small" />,
-  note: <NotesOutlined fontSize="small" />,
-  link: <LinkOutlined fontSize="small" />,
-  audio: <HeadphonesOutlined fontSize="small" />,
-};
-
 const ChapterDoubts = ({ chapterId }) => {
   const { data } = useGetChapterDoubtsQuery(chapterId);
   return (
-    <div style={{ padding: "12px 16px", background: "#FBFBFC", borderTop: "1px solid #E5E5E5", borderRadius: 8 }}>
+    <Box sx={{ mt: 4, pt: 3, borderTop: `1px solid ${tokens.border}` }}>
+      <Typography variant="h6" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <ForumOutlined sx={{ fontSize: 20, color: statusTokens.info.solid }} />
+        Ask about this chapter
+      </Typography>
       <DoubtThread doubts={data?.data} chapter={chapterId} />
-      <div style={{ marginTop: 8 }}>
+      <Box sx={{ mt: 2 }}>
         <DoubtComposer chapter={chapterId} />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
+/**
+ * The student's reading room.
+ *
+ * Rebuilt from an accordion-plus-modal list into a two-pane learning module:
+ * a persistent chapter rail on the left, the lesson itself rendered inline on
+ * the right in a proper reading column. Students are the paying users here, so
+ * the lesson gets the whole stage rather than a cramped dialog.
+ */
 const SubjectViewScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const { data, isLoading } = useGetSubjectContentQuery(id);
   const [triggerPlay] = useLazyPlayContentQuery();
   const [saveProgress] = useSaveProgressMutation();
-  const [noteText, setNoteText] = useState(null);
-  const [playing, setPlaying] = useState(null); // { contentId, url, lastPosition }
-  const [openDoubts, setOpenDoubts] = useState({});
 
   const catalog = data?.data;
   const entitled = catalog?.subject?.entitled;
@@ -82,11 +73,69 @@ const SubjectViewScreen = () => {
   const { data: progressRes } = useGetSubjectProgressQuery(id, { skip: !catalog });
   const progress = progressRes?.data ?? {};
 
-  const { data: certStatusRes } = useGetCertificateStatusQuery(id, { skip: !entitled });
-  const certStatus = certStatusRes?.data;
+  const [activeId, setActiveId] = useState(null);
+  const [payload, setPayload] = useState(null); // { kind, note, url }
+  const [loadingLesson, setLoadingLesson] = useState(false);
+  const [openChapters, setOpenChapters] = useState({});
 
-  const { data: reviewsRes, refetch: refetchReviews } = useGetSubjectReviewsQuery({ id }, { skip: !catalog });
+  const chapters = useMemo(() => catalog?.chapters ?? [], [catalog]);
+
+  /** Flat reading order, so "next lesson" crosses chapter boundaries. */
+  const flat = useMemo(
+    () =>
+      chapters.flatMap((ch) => [
+        ...ch.items.map((i) => ({ ...i, kind: i.type, chapterId: ch._id })),
+        ...(ch.quizzes ?? []).map((q) => ({ ...q, kind: "quiz", chapterId: ch._id })),
+      ]),
+    [chapters]
+  );
+
+  const completion = useMemo(() => {
+    const items = chapters.flatMap((ch) => ch.items ?? []);
+    const total = items.length;
+    const done = items.filter((it) => progress[it._id]?.isCompleted).length;
+    return { total, done, percent: total ? Math.round((done / total) * 100) : 0 };
+  }, [chapters, progress]);
+
+  const active = flat.find((l) => l._id === activeId) ?? null;
+  const activeIndex = flat.findIndex((l) => l._id === activeId);
+  const nextLesson = activeIndex >= 0 ? flat[activeIndex + 1] : null;
+  const prevLesson = activeIndex > 0 ? flat[activeIndex - 1] : null;
+
+  // Land on the first thing the student can actually open.
+  useEffect(() => {
+    if (activeId || flat.length === 0) return;
+    setActiveId((flat.find((l) => !l.locked) ?? flat[0])._id);
+  }, [flat, activeId]);
+
+  const { data: reviewsRes, refetch: refetchReviews } = useGetSubjectReviewsQuery(
+    { id },
+    { skip: !catalog }
+  );
   const reviewsData = reviewsRes?.data;
+
+  // Load whatever the active lesson needs to render.
+  useEffect(() => {
+    let cancelled = false;
+    setPayload(null);
+    if (!active || active.locked || active.kind === "quiz") return undefined;
+
+    setLoadingLesson(true);
+    triggerPlay(active._id)
+      .unwrap()
+      .then((res) => {
+        if (cancelled) return;
+        setPayload({ note: res.data.note, url: res.data.url || res.data.link });
+      })
+      .catch((err) => {
+        if (!cancelled) toast.error(err?.data?.message || "Cannot open this lesson");
+      })
+      .finally(() => !cancelled && setLoadingLesson(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [active, triggerPlay]);
 
   const enroll = () =>
     navigate("/app/student/checkout", {
@@ -104,220 +153,265 @@ const SubjectViewScreen = () => {
 
   const markComplete = async (contentId) => {
     try {
-      const res = await saveProgress({ content: contentId, isCompleted: true }).unwrap();
-      if (res.data.certificateIssued) toast.success("🎓 Certificate earned!");
+      await saveProgress({ content: contentId, isCompleted: true }).unwrap();
     } catch (err) {
       toast.error(err?.data?.message || "Could not save progress");
     }
   };
 
-  const open = async (item) => {
-    if (item.locked) return;
-    try {
-      const res = await triggerPlay(item._id).unwrap();
-      if (item.type === "note") return setNoteText({ content: res.data.note, contentId: item._id });
-      if (item.type === "video" || item.type === "audio") {
-        return setPlaying({
-          contentId: item._id,
-          url: res.data.url,
-          lastPosition: progress[item._id]?.lastPosition || 0,
-        });
-      }
-      const url = res.data.url || res.data.link;
-      if (url) window.open(url, "_blank");
-    } catch (err) {
-      toast.error(err?.data?.message || "Cannot open this content");
+  const goNext = () => {
+    if (active && !active.locked && active.kind !== "quiz" && !progress[active._id]?.isCompleted) {
+      markComplete(active._id);
     }
-  };
-
-  const onVideoProgress = ({ watchTime, lastPosition, isCompleted }) => {
-    if (!playing) return;
-    saveProgress({ content: playing.contentId, watchTime, lastPosition, isCompleted })
-      .unwrap()
-      .then((res) => {
-        if (res.data.certificateIssued) toast.success("🎓 Certificate earned!");
-      })
-      .catch(() => {});
+    if (nextLesson) setActiveId(nextLesson._id);
   };
 
   if (isLoading) {
     return (
-      <BreadcrumbLayout breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: "Loading…" }]} isBusy>
-        <div />
+      <BreadcrumbLayout breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: "…" }]} isBusy>
+        <Box sx={{ display: "flex", gap: 3, flexDirection: { xs: "column", md: "row" } }}>
+          <Skeleton variant="rounded" height={520} sx={{ width: { xs: "100%", md: 320 }, borderRadius: 3 }} />
+          <Skeleton variant="rounded" height={520} sx={{ flexGrow: 1, borderRadius: 3 }} />
+        </Box>
       </BreadcrumbLayout>
     );
   }
-  if (!catalog) return <div style={{ padding: 24 }}>Subject not found.</div>;
+  if (!catalog) return <Box sx={{ p: 3 }}>Subject not found.</Box>;
+
+  const activeChapter = chapters.find((c) => c._id === active?.chapterId);
+  const isDone = active ? !!progress[active._id]?.isCompleted : false;
 
   return (
-    <BreadcrumbLayout breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: catalog.subject.name }]}>
-      <div style={{ width: "100%" }}>
-        <div
-          style={{
-            borderRadius: 16, overflow: "hidden", marginBottom: 20, padding: "26px 28px",
-            background: "linear-gradient(120deg, var(--student-ink) 0%, var(--student-ink-2) 100%)", color: "#fff",
+    <BreadcrumbLayout
+      breadcrumbs={[{ title: "Catalog", path: "/app/student" }, { title: catalog.subject.name }]}
+    >
+      {!entitled && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            flexWrap: "wrap",
+            p: 2.5,
+            borderRadius: 3,
+            bgcolor: statusTokens.info.bg,
           }}
         >
-          <h1 style={{ margin: 0, fontSize: 27 }}>{catalog.subject.name}</h1>
-          {entitled && certStatus && certStatus.total > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6, opacity: 0.9 }}>
-                <span>Your progress</span>
-                <span>{certStatus.percent}%</span>
-              </div>
-              <div style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,0.2)", overflow: "hidden" }}>
-                <div style={{ width: `${certStatus.percent}%`, height: "100%", background: "var(--status-warning-solid)", borderRadius: 4 }} />
-              </div>
-            </div>
-          )}
-        </div>
+          <Box>
+            <Typography sx={{ fontWeight: 700, color: statusTokens.info.fg }}>
+              You&apos;re previewing this subject
+            </Typography>
+            <Typography variant="body2" sx={{ color: statusTokens.info.fg, opacity: 0.85 }}>
+              Enrol to unlock every chapter, note, PDF and video.
+            </Typography>
+          </Box>
+          <Button variant="contained" size="large" onClick={enroll}>
+            Enrol — {money(catalog.subject.pricing?.discountedPrice)}
+          </Button>
+        </Box>
+      )}
 
-        {!entitled && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-accent)", border: "1px solid var(--student-ink)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-            <span>Unlock every chapter, PDF, note and video in this subject.</span>
-            <button onClick={enroll} style={{ background: "linear-gradient(120deg, var(--student-ink) 0%, var(--student-ink-2) 100%)", color: "#fff", border: 0, borderRadius: 999, padding: "8px 18px", cursor: "pointer", fontWeight: 700, whiteSpace: "nowrap" }}>
-              Enroll — {money(catalog.subject.pricing?.discountedPrice)}
-            </button>
-          </div>
-        )}
-        {entitled && (
-          <div style={{ background: "var(--status-success-bg)", border: "1px solid var(--status-success-solid)", borderRadius: 10, padding: "10px 16px", marginBottom: 16, color: "var(--status-success-fg)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600 }}>
-              <span>✓ You're enrolled — all content unlocked.</span>
-            </div>
-            {certStatus?.certificate && (
-              <Link to="/app/student/certificates" style={{ color: "var(--status-success-fg)", fontSize: 14 }}>
-                🎓 View your certificate →
-              </Link>
-            )}
-          </div>
-        )}
+      <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start", flexDirection: { xs: "column", md: "row" } }}>
+        <LessonRail
+          chapters={chapters}
+          activeId={activeId}
+          onSelect={(row) => !row.locked && setActiveId(row._id)}
+          progress={progress}
+          completion={completion}
+          openChapters={openChapters}
+          onToggleChapter={(cid) =>
+            setOpenChapters((s) => ({ ...s, [cid]: s[cid] === false ? true : false }))
+          }
+          subjectName={catalog.subject.name}
+        />
 
-        {catalog.chapters.map((ch, idx) => (
-          <Accordion key={ch._id} defaultExpanded={idx === 0} disableGutters sx={{ mb: 2, border: "1px solid var(--border)", borderRadius: "10px !important", "&:before": { display: "none" }, overflow: "hidden" }}>
-            <AccordionSummary expandIcon={<ExpandMoreOutlined />} sx={{ bgcolor: "#F7F7F8" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", paddingRight: 8 }}>
-                <strong>{ch.chapterNumber}. {ch.title}</strong>
-                {ch.isFreePreview && <Chip size="small" label="Free preview" sx={{ bgcolor: "var(--primary-accent)", color: "var(--student-ink-2)", fontWeight: 700 }} />}
-              </div>
-            </AccordionSummary>
-            <AccordionDetails sx={{ p: 0 }}>
-              {(entitled || ch.isFreePreview) && (
-                <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px" }}>
-                  <Button
-                    size="small"
-                    startIcon={<ForumOutlined fontSize="small" />}
-                    onClick={() => setOpenDoubts((s) => ({ ...s, [ch._id]: !s[ch._id] }))}
-                  >
-                    Doubts
-                  </Button>
-                </div>
-              )}
-              <List disablePadding>
-                {ch.items.map((item) => {
-                  const done = !!progress[item._id]?.isCompleted;
-                  return (
-                    <ListItem
-                      key={item._id}
-                      disablePadding
-                      sx={{ borderTop: "1px solid #E5E5E5" }}
-                      secondaryAction={
-                        item.locked ? (
-                          <Chip size="small" icon={<LockOutlined fontSize="small" />} label="Locked" />
-                        ) : (
-                          <span style={{ display: "flex", gap: 8 }}>
-                            {!done && (
-                              <Button size="small" variant="outlined" sx={{ borderColor: "var(--student-ink)", color: "var(--student-ink)" }} onClick={() => markComplete(item._id)}>
-                                Mark complete
-                              </Button>
-                            )}
-                            <Button size="small" variant="contained" sx={{ bgcolor: "var(--student-ink)", "&:hover": { bgcolor: "var(--student-ink-2)" } }} onClick={() => open(item)}>
-                              Open
-                            </Button>
-                          </span>
-                        )
-                      }
-                    >
-                      <ListItemButton disabled={item.locked} onClick={() => open(item)} sx={{ pr: 22 }}>
-                        <ListItemIcon sx={{ minWidth: 34, color: item.locked ? "var(--faint)" : "var(--student-ink)" }}>
-                          {done ? <CheckCircle fontSize="small" sx={{ color: "var(--success)" }} /> : TYPE_ICON[item.type]}
-                        </ListItemIcon>
-                        <ListItemText primary={item.title} sx={{ color: item.locked ? "var(--faint)" : "inherit" }} />
-                      </ListItemButton>
-                    </ListItem>
-                  );
-                })}
-                {ch.items.length === 0 && (
-                  <ListItem sx={{ borderTop: "1px solid #E5E5E5" }}>
-                    <ListItemText primary="No content yet." sx={{ color: "var(--muted)" }} />
-                  </ListItem>
+        {/* Reading pane */}
+        <Box sx={{ flexGrow: 1, minWidth: 0, width: "100%" }}>
+          <BreadcrumbLayout.Paper sx={{ p: { xs: 2.5, md: 5 } }}>
+            {!active ? (
+              <Typography sx={{ color: tokens.muted, textAlign: "center", py: 8 }}>
+                This subject has no lessons yet.
+              </Typography>
+            ) : (
+              <Box sx={{ maxWidth: 760, mx: "auto" }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: statusTokens.info.fg, fontWeight: 700, letterSpacing: "0.06em" }}
+                >
+                  {activeChapter ? `CHAPTER ${activeChapter.chapterNumber} · ${activeChapter.title}` : ""}
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{ fontSize: { xs: "1.5rem", md: "2rem" }, fontWeight: 700, mt: 1, mb: 3, letterSpacing: "-0.02em" }}
+                >
+                  {active.title}
+                </Typography>
+
+                {/* Locked — a clean upsell, not a dead end */}
+                {active.locked && (
+                  <Box sx={{ textAlign: "center", py: 6, px: 3, bgcolor: tokens.surfaceMuted, borderRadius: 3 }}>
+                    <LockOutlined sx={{ fontSize: 40, color: tokens.faint, mb: 1.5 }} />
+                    <Typography sx={{ fontWeight: 700, mb: 0.5 }}>This lesson is locked</Typography>
+                    <Typography variant="body2" sx={{ color: tokens.muted, mb: 3 }}>
+                      Enrol once and every lesson in {catalog.subject.name} opens up.
+                    </Typography>
+                    <Button variant="contained" size="large" onClick={enroll}>
+                      Enrol — {money(catalog.subject.pricing?.discountedPrice)}
+                    </Button>
+                  </Box>
                 )}
 
-                {ch.quizzes?.map((q) => (
-                  <ListItem
-                    key={q._id}
-                    disablePadding
-                    sx={{ borderTop: "1px solid #E5E5E5", bgcolor: "var(--surface-muted)" }}
-                    secondaryAction={
-                      q.locked ? (
-                        <Chip size="small" icon={<LockOutlined fontSize="small" />} label="Locked" />
-                      ) : (
-                        <Button size="small" variant="contained" onClick={() => navigate(`/app/student/quizzes/${q._id}`)}>
-                          Take quiz
-                        </Button>
-                      )
+                {!active.locked && loadingLesson && (
+                  <Box sx={{ display: "grid", gap: 1.5 }}>
+                    <Skeleton variant="text" height={26} />
+                    <Skeleton variant="text" height={26} width="92%" />
+                    <Skeleton variant="rounded" height={220} />
+                    <Skeleton variant="text" height={26} width="85%" />
+                  </Box>
+                )}
+
+                {/* Notes — the same renderer the teacher wrote them in */}
+                {!active.locked && !loadingLesson && active.kind === "note" && (
+                  <RichText html={payload?.note} sx={{ fontSize: "1.05rem" }} />
+                )}
+
+                {/* Video / audio */}
+                {!active.locked && !loadingLesson && ["video", "audio"].includes(active.kind) && payload?.url && (
+                  <VideoPlayer
+                    url={payload.url}
+                    initialPosition={progress[active._id]?.lastPosition || 0}
+                    onProgress={({ watchTime, lastPosition, isCompleted }) =>
+                      saveProgress({ content: active._id, watchTime, lastPosition, isCompleted })
+                        .unwrap()
+                        .catch(() => {})
                     }
+                  />
+                )}
+
+                {/* PDF / link open in a new tab — say so rather than failing silently */}
+                {!active.locked && !loadingLesson && ["pdf", "link"].includes(active.kind) && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2.5,
+                      p: 3,
+                      borderRadius: 3,
+                      border: `1px solid ${tokens.border}`,
+                      bgcolor: tokens.surfaceMuted,
+                    }}
                   >
-                    <ListItemButton disabled={q.locked} onClick={() => !q.locked && navigate(`/app/student/quizzes/${q._id}`)} sx={{ pr: 20 }}>
-                      <ListItemIcon sx={{ minWidth: 34, color: q.locked ? "var(--faint)" : "var(--student-ink)" }}>
-                        <QuizOutlined fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary={q.title} sx={{ color: q.locked ? "var(--faint)" : "inherit" }} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-              {openDoubts[ch._id] && <ChapterDoubts chapterId={ch._id} />}
-            </AccordionDetails>
-          </Accordion>
-        ))}
+                    {active.kind === "pdf" ? (
+                      <PictureAsPdfOutlined sx={{ fontSize: 36, color: statusTokens.danger.solid }} />
+                    ) : (
+                      <OpenInNewOutlined sx={{ fontSize: 36, color: statusTokens.warning.solid }} />
+                    )}
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: 600 }}>{active.title}</Typography>
+                      <Typography variant="body2" sx={{ color: tokens.muted }}>
+                        Opens in a new tab.
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      disabled={!payload?.url}
+                      onClick={() => window.open(payload.url, "_blank", "noopener")}
+                    >
+                      Open
+                    </Button>
+                  </Box>
+                )}
 
-        <section style={{ marginTop: 32, marginBottom: 32 }}>
-          <h2 style={{ fontSize: 18, marginBottom: 12 }}>Reviews</h2>
-          <RatingSummary summary={reviewsData?.summary} />
-          {entitled && (
-            <div style={{ marginTop: 16 }}>
-              <ReviewForm subjectId={id} onDone={refetchReviews} />
-            </div>
-          )}
-          <ReviewList reviews={reviewsData?.reviews} />
-        </section>
+                {/* Quiz */}
+                {!active.locked && active.kind === "quiz" && (
+                  <Box sx={{ textAlign: "center", py: 5, px: 3, bgcolor: statusTokens.warning.bg, borderRadius: 3 }}>
+                    <QuizOutlined sx={{ fontSize: 40, color: statusTokens.warning.solid, mb: 1.5 }} />
+                    <Typography sx={{ fontWeight: 700, mb: 0.5 }}>Ready to test yourself?</Typography>
+                    <Typography variant="body2" sx={{ color: statusTokens.warning.fg, mb: 3 }}>
+                      Check what stuck from this chapter.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={() => navigate(`/app/student/quizzes/${active._id}`)}
+                    >
+                      Start quiz
+                    </Button>
+                  </Box>
+                )}
 
-        <Dialog open={noteText !== null} onClose={() => setNoteText(null)} maxWidth="sm" fullWidth>
-          <DialogContent>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <IconButton size="small" onClick={() => setNoteText(null)}><CloseOutlined fontSize="small" /></IconButton>
-            </div>
-            <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{noteText?.content}</p>
-            <Button
-              variant="contained"
-              sx={{ mt: 2, bgcolor: "var(--student-ink)", "&:hover": { bgcolor: "var(--student-ink-2)" } }}
-              onClick={() => { markComplete(noteText.contentId); setNoteText(null); }}
-            >
-              Mark as read & close
-            </Button>
-          </DialogContent>
-        </Dialog>
+                {/* Footer nav — the rhythm of moving through a course */}
+                {!active.locked && (
+                  <>
+                    <Divider sx={{ my: 4 }} />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 2,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Button
+                        startIcon={<ArrowBackOutlined />}
+                        disabled={!prevLesson}
+                        onClick={() => prevLesson && setActiveId(prevLesson._id)}
+                      >
+                        Previous
+                      </Button>
 
-        <Dialog open={playing !== null} onClose={() => setPlaying(null)} maxWidth="md" fullWidth>
-          <DialogContent>
-            {playing && <VideoPlayer url={playing.url} initialPosition={playing.lastPosition} onProgress={onVideoProgress} />}
-            <Button variant="outlined" sx={{ mt: 2 }} onClick={() => setPlaying(null)}>
-              Close
-            </Button>
-          </DialogContent>
-        </Dialog>
-      </div>
+                      <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+                        {active.kind !== "quiz" &&
+                          (isDone ? (
+                            <Typography
+                              variant="body2"
+                              sx={{ display: "flex", alignItems: "center", gap: 0.75, color: statusTokens.success.fg, fontWeight: 600 }}
+                            >
+                              <CheckCircle sx={{ fontSize: 18 }} /> Completed
+                            </Typography>
+                          ) : (
+                            <Button
+                              variant="outlined"
+                              startIcon={<CheckCircleOutlineOutlined />}
+                              onClick={() => markComplete(active._id)}
+                            >
+                              Mark complete
+                            </Button>
+                          ))}
+                        <Button
+                          variant="contained"
+                          endIcon={<ArrowForwardOutlined />}
+                          disabled={!nextLesson}
+                          onClick={goNext}
+                        >
+                          {nextLesson ? "Next lesson" : "You're at the end"}
+                        </Button>
+                      </Box>
+                    </Box>
+                  </>
+                )}
+
+                {!active.locked && activeChapter && <ChapterDoubts chapterId={activeChapter._id} />}
+              </Box>
+            )}
+          </BreadcrumbLayout.Paper>
+
+          <BreadcrumbLayout.Paper sx={{ p: { xs: 2.5, md: 4 }, mt: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Reviews
+            </Typography>
+            <RatingSummary summary={reviewsData?.summary} />
+            {entitled && (
+              <Box sx={{ mt: 2 }}>
+                <ReviewForm subjectId={id} onDone={refetchReviews} />
+              </Box>
+            )}
+            <ReviewList reviews={reviewsData?.reviews} />
+          </BreadcrumbLayout.Paper>
+        </Box>
+      </Box>
     </BreadcrumbLayout>
   );
 };

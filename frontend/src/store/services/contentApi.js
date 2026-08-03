@@ -6,6 +6,12 @@ export const contentApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/contents/list", params }),
       providesTags: ["Content"],
     }),
+    // Full document including the note body — /list strips it deliberately,
+    // so anything that EDITS a lesson must load through here.
+    getContent: builder.query({
+      query: (id) => `/contents/${id}`,
+      providesTags: (r, e, id) => [{ type: "Content", id }],
+    }),
     // create accepts a FormData (file upload) — RTK Query passes it through.
     createContent: builder.mutation({
       query: (formData) => ({ url: "/contents", method: "POST", body: formData }),
@@ -13,7 +19,11 @@ export const contentApi = baseApi.injectEndpoints({
     }),
     updateContent: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/contents/${id}`, method: "PUT", body }),
-      invalidatesTags: ["Content"],
+      invalidatesTags: (r, e, { id }) => ["Content", { type: "Content", id }],
+    }),
+    // Images pasted into a note body — returns a public URL to embed.
+    uploadNoteImage: builder.mutation({
+      query: (formData) => ({ url: "/contents/upload-image", method: "POST", body: formData }),
     }),
     deleteContent: builder.mutation({
       query: (id) => ({ url: `/contents/${id}`, method: "DELETE" }),
@@ -28,8 +38,10 @@ export const contentApi = baseApi.injectEndpoints({
 
 export const {
   useGetContentsQuery,
+  useGetContentQuery,
   useCreateContentMutation,
   useUpdateContentMutation,
+  useUploadNoteImageMutation,
   useDeleteContentMutation,
   useLazyPlayContentQuery,
 } = contentApi;

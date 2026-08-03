@@ -163,6 +163,10 @@ export const getSubjectContent = asyncHandler(async (req, res) => {
             order: c.order,
             durationSeconds: c.videoData?.durationSeconds,
             locked,
+            // Why it's open matters: free-to-everyone is a sales signal, while
+            // "unlocked because you paid" is not. Without this the UI could only
+            // read !locked and ended up calling every lesson a free preview.
+            isFree: c.isFree || chapter.isFreePreview,
           };
         })
       );
@@ -172,7 +176,12 @@ export const getSubjectContent = asyncHandler(async (req, res) => {
         await Quiz.find({ chapter: chapter._id, isPublished: true, isDeleted: false })
           .select("title")
           .sort({ createdAt: 1 })
-      ).map((q) => ({ _id: q._id, title: q.title, locked: quizLocked }));
+      ).map((q) => ({
+        _id: q._id,
+        title: q.title,
+        locked: quizLocked,
+        isFree: chapter.isFreePreview,
+      }));
 
       return {
         _id: chapter._id,

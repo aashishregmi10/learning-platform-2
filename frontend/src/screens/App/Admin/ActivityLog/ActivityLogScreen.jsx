@@ -8,7 +8,7 @@ import { useGetActivityLogsQuery } from "../../../../store/services/activityLogA
 
 const ACTIONS = [
   "create_teacher", "approve_teacher", "deactivate_user", "update_pricing", "create_subject", "update_subject",
-  "delete_content", "refund_order", "create_coupon", "update_coupon", "issue_certificate", "process_payout",
+  "delete_content", "refund_order", "create_coupon", "update_coupon", "process_payout",
   "hide_review", "upload_content", "update_content", "create_live_class", "update_live_class", "cancel_live_class", "resolve_doubt",
 ];
 

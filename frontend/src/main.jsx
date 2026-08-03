@@ -12,6 +12,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { store } from "./store";
 import { theme } from "./theme";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
@@ -21,9 +22,11 @@ createRoot(document.getElementById("root")).render(
       <Provider store={store}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <LanguageProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </LanguageProvider>
         </ThemeProvider>
       </Provider>
       <ToastContainer position="top-center" autoClose={2500} hideProgressBar />

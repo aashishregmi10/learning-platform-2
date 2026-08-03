@@ -4,7 +4,6 @@ import Progress from "../models/Progress.js";
 import Content from "../models/Content.js";
 import Chapter from "../models/Chapter.js";
 import { canAccessContent } from "../utils/access.js";
-import { maybeIssueCertificate } from "../services/certificateService.js";
 
 // @route PUT /api/progress  (student, gated)
 export const upsertProgress = asyncHandler(async (req, res) => {
@@ -48,16 +47,7 @@ export const upsertProgress = asyncHandler(async (req, res) => {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
-  // if this completion finishes the subject, auto-issue a certificate
-  let certificate = null;
-  if (update.isCompleted) {
-    certificate = await maybeIssueCertificate({ studentId: req.user._id, subjectId: chapter.subject });
-  }
-
-  res.status(200).json({
-    data: { progress, certificateIssued: !!certificate },
-    message: "Saved",
-  });
+  res.status(200).json({ data: { progress }, message: "Saved" });
 });
 
 // @route GET /api/progress/subject/:subjectId  (student)

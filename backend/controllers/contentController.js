@@ -9,6 +9,7 @@ import { assertSubjectWritable } from "../utils/teacherScope.js";
 import { canAccessContent } from "../utils/access.js";
 import {
   uploadBuffer,
+  uploadPublicImage,
   signedDeliveryUrl,
   signedInlineUrl,
   destroyAsset,
@@ -106,6 +107,29 @@ export const createContent = asyncHandler(async (req, res) => {
   res.status(201).json({ data: content, message: "Content created" });
 });
 
+/**
+ * @route POST /api/contents/upload-image  (admin/teacher)
+ *
+ * Images placed inside a note body. Unlike videos and PDFs these are stored
+ * PUBLICLY, because they render in a plain <img src> inside the note HTML and
+ * a signed URL would expire while the student was still reading the page.
+ *
+ * The note text itself stays gated; only the image bytes are reachable, and
+ * only by whoever already holds the random Cloudinary public_id.
+ */
+export const uploadNoteImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    res.status(422);
+    throw new Error("No image uploaded");
+  }
+  if (!req.file.mimetype?.startsWith("image/")) {
+    res.status(422);
+    throw new Error("That file is not an image");
+  }
+  const result = await uploadPublicImage(req.file.buffer, { folder: "bsc-nepal/notes" });
+  res.status(200).json({ data: { url: result.secure_url }, message: "Uploaded" });
+});
+
 // @route GET /api/contents/list?chapter=&type=  (any auth)
 export const listContents = asyncHandler(async (req, res) => {
   const { page, limit, chapter, type } = req.query;
@@ -122,6 +146,27 @@ export const listContents = asyncHandler(async (req, res) => {
     project: { "noteData.content": 0, "storage.fileKey": 0 },
   });
   res.status(200).json({ data, totalItems, message: "OK" });
+});
+
+/**
+ * @route GET /api/contents/:id  (admin/teacher-scoped)
+ *
+ * The full document, including the note body and link target that
+ * `listContents` deliberately strips. The edit screen needs the real content —
+ * without this it opened blank and saving wrote that blank back over the note.
+ */
+export const getContent = asyncHandler(async (req, res) => {
+  const content = await Content.findOne({ _id: req.params.id, isDeleted: false }).populate({
+    path: "chapter",
+    select: "subject",
+  });
+  if (!content) {
+    res.status(404);
+    throw new Error("Content not found");
+  }
+  await assertSubjectWritable(req.user, content.chapter.subject, res);
+
+  res.status(200).json({ data: content, message: "OK" });
 });
 
 // @route GET /api/contents/:id/play  (student, gated) — mint signed url
@@ -191,6 +236,11 @@ export const updateContent = asyncHandler(async (req, res) => {
   });
   if (req.body.noteContent !== undefined && content.type === "note") {
     content.noteData.content = req.body.noteContent;
+  }
+  // A mistyped web address is the other thing teachers need to fix after saving.
+  // Link targets live in storage.fileKey (set the same way on create).
+  if (req.body.linkUrl !== undefined && content.type === "link") {
+    content.storage = { provider: "local", fileKey: req.body.linkUrl };
   }
   await content.save();
 

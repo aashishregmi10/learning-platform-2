@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@mui/material";
-import { SchoolOutlined, WorkspacePremiumOutlined, MenuBookOutlined } from "@mui/icons-material";
+import { SchoolOutlined, LayersOutlined, MenuBookOutlined } from "@mui/icons-material";
 
 import { useGetMyCatalogQuery } from "../../../store/services/catalogApi";
-import { useGetMyCertificatesQuery } from "../../../store/services/certificateApi";
 import { useAuth } from "../../../hooks/useAuth";
 import BreadcrumbLayout from "../../../components/Shared/BreadcrumbLayout";
 import PageHeader from "../../../components/Student/PageHeader";
@@ -39,12 +38,16 @@ const StudentCatalogScreen = () => {
   const navigate = useNavigate();
   const { loggedInUser } = useAuth();
   const { data, isLoading } = useGetMyCatalogQuery();
-  const { data: certRes } = useGetMyCertificatesQuery();
   const catalog = data?.data;
-  const certificateCount = certRes?.data?.length ?? 0;
 
   const enrolledCount = catalog?.years.reduce(
     (sum, y) => sum + y.subjects.filter((s) => s.entitled).length,
+    0
+  ) ?? 0;
+
+  // Replaces the old certificate count in the header.
+  const chapterCount = catalog?.years.reduce(
+    (sum, y) => sum + y.subjects.reduce((n, s) => n + (s.entitled ? s.totalChapters || 0 : 0), 0),
     0
   ) ?? 0;
 
@@ -81,7 +84,7 @@ const StudentCatalogScreen = () => {
               right={
                 <div style={{ display: "flex", gap: 24 }}>
                   <HeaderStat icon={<SchoolOutlined fontSize="small" />} value={enrolledCount} label="enrolled" />
-                  <HeaderStat icon={<WorkspacePremiumOutlined fontSize="small" />} value={certificateCount} label="certificates" />
+                  <HeaderStat icon={<LayersOutlined fontSize="small" />} value={chapterCount} label="chapters" />
                 </div>
               }
             />

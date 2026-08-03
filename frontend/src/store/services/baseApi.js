@@ -23,7 +23,6 @@ export const baseApi = createApi({
     // Part 4+
     "Progress",
     "Quiz",
-    "Certificate",
     // Part 5+
     "LiveClass",
     "Notification",

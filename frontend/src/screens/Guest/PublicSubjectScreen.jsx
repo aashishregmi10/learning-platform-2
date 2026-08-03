@@ -1,16 +1,69 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Skeleton } from "@mui/material";
+import {
+  ArticleOutlined,
+  HeadphonesOutlined,
+  LinkOutlined,
+  LockOutlined,
+  OndemandVideoOutlined,
+  PictureAsPdfOutlined,
+  QuizOutlined,
+} from "@mui/icons-material";
 
 import { useGetSubjectBySlugQuery } from "../../store/services/subjectApi";
 import { useGetSubjectContentQuery } from "../../store/services/catalogApi";
 import { useGetSubjectReviewsQuery } from "../../store/services/reviewApi";
 import { useAuth } from "../../hooks/useAuth";
+import { tokens } from "../../theme";
 import RatingSummary from "../../components/Student/RatingSummary";
 import ReviewList from "../../components/Student/ReviewList";
 
 const money = (n) => `NPR ${Number(n || 0).toLocaleString()}`;
 
-const TYPE_LABEL = { video: "▶ Video", pdf: "📄 PDF", note: "📝 Note", link: "🔗 Link", audio: "🎧 Audio" };
+const TYPE_ICON = {
+  video: OndemandVideoOutlined,
+  pdf: PictureAsPdfOutlined,
+  note: ArticleOutlined,
+  link: LinkOutlined,
+  audio: HeadphonesOutlined,
+};
+
+const ItemRow = ({ icon: Icon, title, locked, free, tinted }) => (
+  <li
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 12,
+      padding: "11px 18px",
+      borderTop: `1px solid ${tokens.border}`,
+      background: tinted ? tokens.surfaceMuted : "transparent",
+    }}
+  >
+    <span
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        color: locked ? tokens.faint : tokens.ink,
+        fontSize: 14,
+        minWidth: 0,
+      }}
+    >
+      <Icon sx={{ fontSize: 18, color: locked ? "var(--faint)" : "var(--primary)", flexShrink: 0 }} />
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {title}
+      </span>
+    </span>
+    {locked ? (
+      <LockOutlined titleAccess="Purchase required" sx={{ fontSize: 16, color: "var(--faint)" }} />
+    ) : free ? (
+      <span style={{ color: "var(--status-success-fg)", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
+        Free preview
+      </span>
+    ) : null}
+  </li>
+);
 
 // Public syllabus preview — read-only (no player/quiz/doubts). Anonymous
 // visitors see lock badges and an "Enroll now" CTA; entitled visitors who
@@ -23,17 +76,29 @@ const PublicSubjectScreen = () => {
   const { data: subjectRes, isLoading: loadingSubject, error } = useGetSubjectBySlugQuery(slug);
   const subject = subjectRes?.data;
 
-  const { data: contentRes, isLoading: loadingContent } = useGetSubjectContentQuery(subject?._id, { skip: !subject?._id });
+  const { data: contentRes, isLoading: loadingContent } = useGetSubjectContentQuery(subject?._id, {
+    skip: !subject?._id,
+  });
   const chapters = contentRes?.data?.chapters ?? [];
 
-  const { data: reviewsRes } = useGetSubjectReviewsQuery({ id: subject?._id }, { skip: !subject?._id });
+  const { data: reviewsRes } = useGetSubjectReviewsQuery(
+    { id: subject?._id },
+    { skip: !subject?._id }
+  );
   const reviewsData = reviewsRes?.data;
 
   const enroll = () => {
     if (isAuthenticated && isStudent) {
       navigate("/app/student/checkout", {
         state: {
-          items: [{ itemType: "subject", subject: subject._id, title: subject.name, price: subject.pricing?.discountedPrice }],
+          items: [
+            {
+              itemType: "subject",
+              subject: subject._id,
+              title: subject.name,
+              price: subject.pricing?.discountedPrice,
+            },
+          ],
         },
       });
     } else {
@@ -43,88 +108,275 @@ const PublicSubjectScreen = () => {
 
   if (loadingSubject) {
     return (
-      <div style={{ maxWidth: 820, margin: "0 auto" }}>
-        <Skeleton variant="text" width={140} height={24} sx={{ mb: 2 }} />
-        <Skeleton variant="rounded" height={130} sx={{ borderRadius: "16px", mb: 3 }} />
-        <Skeleton variant="rounded" height={56} sx={{ borderRadius: "10px", mb: 3 }} />
-        <Skeleton variant="text" width={140} height={28} sx={{ mb: 1 }} />
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} variant="rounded" height={90} sx={{ borderRadius: "10px", mb: 2 }} />
-        ))}
+      <>
+        <div className="band band--ink">
+          <div className="page" style={{ paddingBlock: 52 }}>
+            <Skeleton variant="text" width={320} height={46} sx={{ bgcolor: "rgba(255,255,255,0.18)" }} />
+            <Skeleton variant="text" width={220} height={24} sx={{ bgcolor: "rgba(255,255,255,0.18)" }} />
+          </div>
+        </div>
+        <div className="page" style={{ paddingBlock: 44 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={92} sx={{ borderRadius: "12px", mb: 2 }} />
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  if (error || !subject) {
+    return (
+      <div className="page" style={{ paddingBlock: 100, textAlign: "center" }}>
+        <h1 style={{ marginBottom: 8 }}>Subject not found</h1>
+        <p style={{ color: tokens.muted, marginBottom: 20 }}>
+          That link doesn&apos;t point at anything we publish.
+        </p>
+        <Link to="/" style={{ color: "var(--primary)", fontWeight: 600 }}>
+          ← Back to home
+        </Link>
       </div>
     );
   }
-  if (error || !subject) return <div style={{ padding: 24 }}>Subject not found.</div>;
+
+  const totalItems = chapters.reduce(
+    (n, ch) => n + (ch.items?.length ?? 0) + (ch.quizzes?.length ?? 0),
+    0
+  );
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto" }}>
-      <Link to={`/catalog/${subject.program?.slug}`} style={{ color: "var(--primary)", fontSize: 14 }}>← Back to {subject.program?.name}</Link>
+    <>
+      <section className="band band--ink">
+        <div className="page" style={{ paddingBlock: 52 }}>
+          <Link
+            to={`/catalog/${subject.program?.slug}`}
+            style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, textDecoration: "none" }}
+          >
+            ← Back to {subject.program?.name}
+          </Link>
+          <span
+            style={{
+              display: "inline-block",
+              marginTop: 16,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: "uppercase",
+              background: "rgba(255,255,255,0.16)",
+              border: "1px solid rgba(255,255,255,0.22)",
+              borderRadius: 20,
+              padding: "4px 13px",
+            }}
+          >
+            {subject.category}
+          </span>
+          <h1
+            style={{
+              margin: "12px 0 6px",
+              fontSize: "clamp(28px, 3.4vw, 40px)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {subject.name}
+          </h1>
+          <p style={{ margin: 0, opacity: 0.85 }}>
+            {subject.year?.yearName} · {subject.program?.name}
+            {totalItems > 0 ? ` · ${chapters.length} chapters · ${totalItems} items` : ""}
+          </p>
+        </div>
+      </section>
 
+      {/* Syllabus + sticky enroll rail. Two columns are what keep this page
+          from reading as a narrow strip on a desktop screen. */}
       <div
+        className="page"
         style={{
-          borderRadius: 16, overflow: "hidden", margin: "14px 0 20px", padding: "28px 28px",
-          background: "linear-gradient(120deg, #1D4ED8 0%, #2563EB 100%)", color: "#fff",
+          paddingBlock: 48,
+          display: "grid",
+          gap: 40,
+          gridTemplateColumns: "minmax(0, 1fr) 320px",
+          alignItems: "start",
         }}
       >
-        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", background: "rgba(255,255,255,0.18)", borderRadius: 20, padding: "3px 12px" }}>
-          {subject.category}
-        </span>
-        <h1 style={{ margin: "12px 0 4px", fontSize: 28 }}>{subject.name}</h1>
-        <p style={{ margin: 0, opacity: 0.85 }}>{subject.year?.yearName} · {subject.program?.name}</p>
-      </div>
+        <div style={{ minWidth: 0 }}>
+          <h2 style={{ fontSize: 20, marginTop: 0, marginBottom: 16, letterSpacing: "-0.01em" }}>
+            What&apos;s inside
+          </h2>
 
-      {subject.entitled ? (
-        <div style={{ background: "var(--status-success-bg)", border: "1px solid var(--status-success-solid)", borderRadius: 10, padding: "12px 16px", marginBottom: 16, color: "var(--status-success-fg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 600 }}>✓ You're already enrolled in this subject.</span>
-          <Link to={`/app/student/subjects/${subject._id}`} style={{ color: "var(--status-success-fg)", fontWeight: 600 }}>Continue learning →</Link>
-        </div>
-      ) : (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-accent)", border: "1px solid var(--primary)", borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
-          <span>Unlock every chapter, PDF, note and video in this subject.</span>
-          <button onClick={enroll} style={{ background: "var(--primary)", color: "#fff", border: 0, borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
-            Enroll — {money(subject.pricing?.discountedPrice)}
-          </button>
-        </div>
-      )}
+          {loadingContent &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} variant="rounded" height={92} sx={{ borderRadius: "12px", mb: 2 }} />
+            ))}
 
-      <h2 style={{ fontSize: 18, marginBottom: 12 }}>What's inside</h2>
-      {loadingContent && Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} variant="rounded" height={90} sx={{ borderRadius: "10px", mb: 2 }} />
-      ))}
-      {chapters.map((ch) => (
-        <section key={ch._id} style={{ marginBottom: 20, border: "1px solid #E5E5E5", borderRadius: 10, overflow: "hidden" }}>
-          <div style={{ padding: "12px 16px", background: "#F7F7F8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <strong>{ch.chapterNumber}. {ch.title}</strong>
-            {ch.isFreePreview && <span style={{ fontSize: 12, color: "#171717", fontWeight: 600 }}>Free preview</span>}
-          </div>
-          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-            {ch.items.map((item) => (
-              <li key={item._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #E5E5E5" }}>
-                <span style={{ color: item.locked ? "var(--faint)" : "#171717" }}>{TYPE_LABEL[item.type]} &nbsp; {item.title}</span>
-                {item.locked ? (
-                  <span title="Purchase required" style={{ color: "var(--faint)", fontSize: 13 }}>🔒 Locked</span>
-                ) : (
-                  <span style={{ color: "#15803D", fontSize: 13 }}>Free preview</span>
+          {!loadingContent && chapters.length === 0 && (
+            <p style={{ color: tokens.muted }}>The syllabus for this subject is still being built.</p>
+          )}
+
+          {chapters.map((ch) => (
+            <section
+              key={ch._id}
+              style={{
+                marginBottom: 16,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: 12,
+                overflow: "hidden",
+                background: tokens.surface,
+              }}
+            >
+              <div
+                style={{
+                  padding: "13px 18px",
+                  background: tokens.surfaceMuted,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 12,
+                }}
+              >
+                <strong style={{ fontSize: 15 }}>
+                  {ch.chapterNumber}. {ch.title}
+                </strong>
+                {ch.isFreePreview && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "var(--status-success-fg)",
+                      background: "var(--status-success-bg)",
+                      borderRadius: 6,
+                      padding: "3px 9px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Free preview
+                  </span>
                 )}
-              </li>
-            ))}
-            {ch.items.length === 0 && <li style={{ padding: "10px 16px", color: "#71717A" }}>No content yet.</li>}
-            {ch.quizzes?.map((q) => (
-              <li key={q._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid #E5E5E5", background: "var(--surface-muted)" }}>
-                <span style={{ color: q.locked ? "var(--faint)" : "#171717" }}>📝 Quiz &nbsp; {q.title}</span>
-                {q.locked && <span title="Purchase required" style={{ color: "var(--faint)", fontSize: 13 }}>🔒 Locked</span>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+              </div>
+              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                {ch.items.map((item) => (
+                  <ItemRow
+                    key={item._id}
+                    icon={TYPE_ICON[item.type] ?? ArticleOutlined}
+                    title={item.title}
+                    locked={item.locked}
+                    // Only genuinely free items say so — an enrolled visitor
+                    // shouldn't see "Free preview" stamped on the whole subject.
+                    free={item.isFree}
+                  />
+                ))}
+                {ch.items.length === 0 && (
+                  <li style={{ padding: "11px 18px", color: tokens.muted, fontSize: 14 }}>
+                    No content yet.
+                  </li>
+                )}
+                {ch.quizzes?.map((q) => (
+                  <ItemRow key={q._id} icon={QuizOutlined} title={q.title} locked={q.locked} tinted />
+                ))}
+              </ul>
+            </section>
+          ))}
 
-      <section style={{ marginTop: 32, marginBottom: 32 }}>
-        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Reviews</h2>
-        <RatingSummary summary={reviewsData?.summary} />
-        <ReviewList reviews={reviewsData?.reviews} />
-      </section>
-    </div>
+          <section style={{ marginTop: 40 }}>
+            <h2 style={{ fontSize: 20, marginBottom: 14, letterSpacing: "-0.01em" }}>Reviews</h2>
+            <RatingSummary summary={reviewsData?.summary} />
+            <ReviewList reviews={reviewsData?.reviews} />
+          </section>
+        </div>
+
+        <aside style={{ position: "sticky", top: 88 }}>
+          {subject.entitled ? (
+            <div
+              style={{
+                border: "1px solid var(--status-success-solid)",
+                background: "var(--status-success-bg)",
+                borderRadius: 14,
+                padding: 22,
+              }}
+            >
+              <div style={{ fontWeight: 700, color: "var(--status-success-fg)", marginBottom: 6 }}>
+                You&apos;re enrolled
+              </div>
+              <p style={{ color: "var(--status-success-fg)", fontSize: 14, margin: "0 0 16px" }}>
+                Every chapter in this subject is already unlocked for you.
+              </p>
+              <Link
+                to={`/app/student/subjects/${subject._id}`}
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  background: "var(--status-success-solid)",
+                  color: "#fff",
+                  fontWeight: 700,
+                  borderRadius: 8,
+                  padding: "11px 0",
+                }}
+              >
+                Continue learning →
+              </Link>
+            </div>
+          ) : (
+            <div
+              style={{
+                border: `1px solid ${tokens.border}`,
+                borderRadius: 14,
+                padding: 22,
+                background: tokens.surface,
+              }}
+            >
+              <div style={{ fontSize: 12, color: tokens.muted, marginBottom: 4 }}>One-time price</div>
+              <div
+                style={{
+                  fontFamily: "monospace",
+                  fontSize: 28,
+                  fontWeight: 800,
+                  letterSpacing: "-0.02em",
+                  marginBottom: 4,
+                }}
+              >
+                {money(subject.pricing?.discountedPrice)}
+              </div>
+              {subject.pricing?.originalPrice > subject.pricing?.discountedPrice && (
+                <div
+                  style={{
+                    fontFamily: "monospace",
+                    fontSize: 14,
+                    color: tokens.faint,
+                    textDecoration: "line-through",
+                    marginBottom: 12,
+                  }}
+                >
+                  {money(subject.pricing.originalPrice)}
+                </div>
+              )}
+              <p style={{ color: tokens.muted, fontSize: 14, lineHeight: 1.55, margin: "12px 0 18px" }}>
+                Unlock every chapter, PDF, note, video and quiz in this subject.
+              </p>
+              <button
+                onClick={enroll}
+                style={{
+                  width: "100%",
+                  background: "var(--primary)",
+                  color: "#fff",
+                  border: 0,
+                  borderRadius: 8,
+                  padding: "12px 0",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: 15,
+                }}
+              >
+                Enroll now
+              </button>
+              <div style={{ marginTop: 14, fontSize: 12.5, color: tokens.muted, lineHeight: 1.9 }}>
+                <div>✓ {chapters.length} chapters</div>
+                <div>✓ Lifetime access to this subject</div>
+                <div>✓ Live classes with your teacher</div>
+              </div>
+            </div>
+          )}
+        </aside>
+      </div>
+    </>
   );
 };
 

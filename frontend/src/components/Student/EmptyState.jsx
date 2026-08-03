@@ -1,4 +1,4 @@
-// Consistent empty state for Subscriptions/Orders/Certificates/Live Classes —
+// Consistent empty state for Subscriptions/Orders/Live Classes —
 // replaces the bare "No X yet." text that made those pages feel unfinished.
 const EmptyState = ({ icon, title, subtitle, action }) => (
   <div

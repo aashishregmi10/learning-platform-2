@@ -20,6 +20,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { removeUser } from "../../store/authSlice";
 import { statusTokens, tokens } from "../../theme";
 import NotificationBell from "../../components/Shared/NotificationBell";
+import LanguageToggle from "../../components/Shared/LanguageToggle";
 
 const drawerWidth = 250;
 
@@ -73,6 +74,7 @@ const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
             <MenuIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
+          <LanguageToggle />
           {loggedInUser && <NotificationBell />}
           <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
             <Avatar

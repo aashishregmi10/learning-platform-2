@@ -15,7 +15,6 @@ const ACTIONS = [
   "refund_order",
   "create_coupon",
   "update_coupon",
-  "issue_certificate",
   "process_payout",
   "hide_review",
   // teacher

@@ -7,7 +7,6 @@ import GuestLayout from "./layouts/GuestLayout/GuestLayout";
 import HomeScreen from "./screens/Guest/HomeScreen";
 import PublicCatalogScreen from "./screens/Guest/PublicCatalogScreen";
 import PublicSubjectScreen from "./screens/Guest/PublicSubjectScreen";
-import CertificateVerifyScreen from "./screens/Guest/CertificateVerifyScreen";
 import LoginScreen from "./screens/Guest/LoginScreen";
 import NotFoundScreen from "./screens/NotFoundScreen";
 
@@ -23,8 +22,6 @@ function App() {
         />
         <Route path="catalog/:programSlug" element={<PublicCatalogScreen />} />
         <Route path="subjects/:slug" element={<PublicSubjectScreen />} />
-        <Route path="verify" element={<CertificateVerifyScreen />} />
-        <Route path="verify/:number" element={<CertificateVerifyScreen />} />
       </Route>
       <Route
         path="/login"

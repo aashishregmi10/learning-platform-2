@@ -7,6 +7,7 @@ import {
 } from "@mui/icons-material";
 
 import SidebarMenu from "./SidebarMenu";
+import { useT } from "../../i18n/LanguageContext";
 import { statusTokens } from "../../theme";
 import { useGetSubjectsQuery } from "../../store/services/subjectApi";
 import { useGetMyDoubtsQuery } from "../../store/services/doubtApi";
@@ -16,6 +17,7 @@ import { useGetMyDoubtsQuery } from "../../store/services/doubtApi";
 const SUBJECT_QUERY_ARGS = { limit: 50 };
 
 const TeacherSidebar = () => {
+  const t = useT();
   const { data } = useGetSubjectsQuery(SUBJECT_QUERY_ARGS);
   const { data: doubtsRes } = useGetMyDoubtsQuery();
   const subjects = data?.data ?? [];
@@ -23,19 +25,19 @@ const TeacherSidebar = () => {
 
   const menu = [
     {
-      title: "Dashboard",
+      title: t("nav.dashboard"),
       path: "/app/teacher",
       icon: <DashboardOutlined />,
       end: true,
       color: statusTokens.info.solid,
     },
     {
-      title: "My Subjects",
+      title: t("nav.mySubjects"),
       path: "/app/teacher/subjects",
       icon: <MenuBookOutlined />,
       color: statusTokens.info.solid,
       children: [
-        { title: "All subjects", path: "/app/teacher/subjects", end: true },
+        { title: t("nav.allSubjects"), path: "/app/teacher/subjects", end: true },
         ...subjects.map((s) => ({
           title: s.name,
           path: `/app/teacher/subjects/${s._id}`,
@@ -46,19 +48,19 @@ const TeacherSidebar = () => {
       ],
     },
     {
-      title: "Quizzes",
+      title: t("nav.quizzes"),
       path: "/app/teacher/quizzes",
       icon: <QuizOutlined />,
       color: statusTokens.warning.solid,
     },
     {
-      title: "Live Classes",
+      title: t("nav.liveClasses"),
       path: "/app/teacher/live-classes",
       icon: <VideocamOutlined />,
       color: statusTokens.danger.solid,
     },
     {
-      title: "Q&A",
+      title: t("nav.questions"),
       path: "/app/teacher/doubts",
       icon: <QuestionAnswerOutlined />,
       color: statusTokens.success.solid,

@@ -77,6 +77,39 @@ a {
   color: inherit;
 }
 
+/* ---------------------------------------------------------------------------
+   Public storefront layout
+   `.band` spans the full viewport width and owns the background; `.page` sits
+   inside it and holds the content column. Splitting the two is what stops the
+   homepage reading as a narrow strip floating in empty gutters.
+   ------------------------------------------------------------------------- */
+.page {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+.band {
+  width: 100%;
+}
+
+.band--tint {
+  background: var(--surface-muted);
+  border-block: 1px solid var(--border);
+}
+
+.band--ink {
+  background: linear-gradient(120deg, #1d4ed8 0%, #2563eb 58%, #1e293b 130%);
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-inline: 16px;
+  }
+}
+
 /* Public storefront card hover-lift — inline styles can't express :hover */
 .guest-card {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
