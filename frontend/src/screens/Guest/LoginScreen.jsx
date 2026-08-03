@@ -123,7 +123,7 @@ const LoginScreen = () => {
                 Dev: login as Ram (no purchases)
               </Button>
               <Button fullWidth size="small" variant="outlined" onClick={() => devLogin("student2@bsc.np")}>
-                Dev: login as Priya (enrolled in 1st Year)
+                Dev: login as Priya (paid — sees every active subject)
               </Button>
             </Box>
           </>

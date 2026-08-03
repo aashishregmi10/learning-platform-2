@@ -11,6 +11,9 @@ import mongoose from "mongoose";
 import { connectDB } from "../config/db.config.js";
 import User from "../models/User.js";
 import StudentProfile from "../models/StudentProfile.js";
+import Subject from "../models/Subject.js";
+import Subscription from "../models/Subscription.js";
+import Entitlement from "../models/Entitlement.js";
 
 const upsert = async (Model, find, create) => {
   let doc = await Model.findOne(find);
@@ -47,16 +50,52 @@ await StudentProfile.findOneAndUpdate(
   { upsert: true }
 );
 
+// Priya is the "already paid" test account. The catalog is now built by hand
+// through the admin UI rather than seeded, so instead of granting access to
+// specific hard-coded subjects (which would silently stop matching reality),
+// re-grant her an active entitlement to every subject that exists right now.
+// Re-run this script after adding subjects and she stays a working example.
+await Entitlement.deleteMany({ student: student2._id });
+await Subscription.deleteMany({ user: student2._id, type: "program" });
+
+const activeSubjects = await Subject.find({ isActive: true, isDeleted: false });
+let entitledCount = 0;
+
+if (activeSubjects.length > 0) {
+  const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  const blanketGrant = await Subscription.create({
+    user: student2._id,
+    type: "program",
+    price: { amount: 0, currency: "NPR" }, // seeded, not a real purchase
+    startedAt: new Date(),
+    expiresAt,
+    status: "active",
+  });
+
+  await Promise.all(
+    activeSubjects.map((subject) =>
+      Entitlement.create({
+        student: student2._id,
+        subject: subject._id,
+        source: "program",
+        subscription: blanketGrant._id,
+        expiresAt,
+        isActive: true,
+      })
+    )
+  );
+  entitledCount = activeSubjects.length;
+}
+
 console.log(`
 ✅ Seed complete.
 
 Login credentials
   Admin    : admin@bsc.np    / Admin@123  (staff login)
-  Student  : student@bsc.np  (Ram, use the dev-login buttons on /login)
-  Student2 : student2@bsc.np (Priya, use the dev-login buttons on /login)
+  Student  : student@bsc.np  (Ram, no purchases — dev-login buttons on /login)
+  Student2 : student2@bsc.np (Priya, entitled to ${entitledCount} active subject${entitledCount === 1 ? "" : "s"})
 
-Catalog is empty — create programs, years, subjects and teachers from the admin UI.
-`);
+${activeSubjects.length === 0 ? "No subjects exist yet — create some from the admin UI, then re-run this script to entitle Priya to them." : ""}`);
 
 await mongoose.disconnect();
 process.exit(0);
