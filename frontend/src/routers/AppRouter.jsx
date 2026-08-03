@@ -29,6 +29,8 @@ import SubjectFormScreen from "../screens/App/Admin/Catalog/SubjectFormScreen";
 import SubjectHomeScreen from "../screens/App/Teacher/Subject/SubjectHomeScreen";
 import ChaptersScreen from "../screens/App/Teacher/Subject/ChaptersScreen";
 import ChapterDetailScreen from "../screens/App/Teacher/Subject/ChapterDetailScreen";
+import ChapterFormScreen from "../screens/App/Teacher/Subject/ChapterFormScreen";
+import TopicFormScreen from "../screens/App/Teacher/Subject/TopicFormScreen";
 import SubjectQuestionsScreen from "../screens/App/Teacher/Subject/SubjectQuestionsScreen";
 import CouponListScreen from "../screens/App/Admin/Coupon/CouponListScreen";
 import CouponFormScreen from "../screens/App/Admin/Coupon/CouponFormScreen";
@@ -93,7 +95,11 @@ const AppRouter = () => {
         <Route path="admin/catalog/subjects/create" element={<AdminOnly><SubjectFormScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id" element={<AdminOnly><SubjectHomeScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id/lessons" element={<AdminOnly><ChaptersScreen /></AdminOnly>} />
+        <Route path="admin/catalog/subjects/:id/chapters/create" element={<AdminOnly><ChapterFormScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id/chapters/:chapterId" element={<AdminOnly><ChapterDetailScreen /></AdminOnly>} />
+        <Route path="admin/catalog/subjects/:id/chapters/:chapterId/edit" element={<AdminOnly><ChapterFormScreen /></AdminOnly>} />
+        <Route path="admin/catalog/subjects/:id/chapters/:chapterId/topics/create" element={<AdminOnly><TopicFormScreen /></AdminOnly>} />
+        <Route path="admin/catalog/subjects/:id/chapters/:chapterId/topics/:topicId/edit" element={<AdminOnly><TopicFormScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id/questions" element={<AdminOnly><SubjectQuestionsScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id/edit" element={<AdminOnly><SubjectFormScreen /></AdminOnly>} />
         {/* Coupons */}
@@ -105,7 +111,11 @@ const AppRouter = () => {
         <Route path="teacher/subjects" element={<TeacherOnly><TeacherSubjectsScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id" element={<TeacherOnly><SubjectHomeScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id/lessons" element={<TeacherOnly><ChaptersScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects/:id/chapters/create" element={<TeacherOnly><ChapterFormScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id/chapters/:chapterId" element={<TeacherOnly><ChapterDetailScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects/:id/chapters/:chapterId/edit" element={<TeacherOnly><ChapterFormScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects/:id/chapters/:chapterId/topics/create" element={<TeacherOnly><TopicFormScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects/:id/chapters/:chapterId/topics/:topicId/edit" element={<TeacherOnly><TopicFormScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id/questions" element={<TeacherOnly><SubjectQuestionsScreen /></TeacherOnly>} />
         <Route path="teacher/quizzes" element={<TeacherOnly><QuizListScreen /></TeacherOnly>} />
         <Route path="teacher/quizzes/create" element={<TeacherOnly><QuizFormScreen /></TeacherOnly>} />

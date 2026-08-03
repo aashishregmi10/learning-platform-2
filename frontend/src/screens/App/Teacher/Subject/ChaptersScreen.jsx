@@ -16,7 +16,6 @@ import {
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import BigEmptyState from "../../../../components/Shared/BigEmptyState";
 import ConfirmDialog from "../../../../components/Shared/ConfirmDialog";
-import AddChapterDialog from "../../../../components/Teacher/AddChapterDialog";
 import { useT } from "../../../../i18n/LanguageContext";
 import { statusTokens, tokens } from "../../../../theme";
 import { relativeTime } from "../../../../utils/relativeTime";
@@ -182,13 +181,10 @@ const ChaptersScreen = () => {
   const { data: chaptersRes, isFetching } = useGetChaptersQuery({ subject: id });
   const [deleteChapter, { isLoading: deleting }] = useDeleteChapterMutation();
 
-  const [adding, setAdding] = useState(false);
-  const [renaming, setRenaming] = useState(null);
   const [confirming, setConfirming] = useState(null);
 
   const subject = subjectRes?.data;
   const chapters = chaptersRes?.data ?? [];
-  const nextNumber = chapters.reduce((max, c) => Math.max(max, c.chapterNumber || 0), 0) + 1;
 
   const removeChapter = async () => {
     try {
@@ -213,7 +209,7 @@ const ChaptersScreen = () => {
       isBusy={isLoading || isFetching}
       headerActions={
         chapters.length > 0 && (
-          <Button variant="contained" startIcon={<AddOutlined />} onClick={() => setAdding(true)}>
+          <Button variant="contained" startIcon={<AddOutlined />} onClick={() => navigate(`${base}/chapters/create`)}>
             {t("chapter.add")}
           </Button>
         )
@@ -225,7 +221,7 @@ const ChaptersScreen = () => {
           title={t("chapter.emptyTitle")}
           body={t("chapter.emptyBody")}
           actionLabel={t("chapter.addFirst")}
-          onAction={() => setAdding(true)}
+          onAction={() => navigate(`${base}/chapters/create`)}
         />
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -234,13 +230,13 @@ const ChaptersScreen = () => {
               key={ch._id}
               chapter={ch}
               onOpen={() => navigate(`${base}/chapters/${ch._id}`)}
-              onRename={() => setRenaming(ch)}
+              onRename={() => navigate(`${base}/chapters/${ch._id}/edit`)}
               onDelete={() => setConfirming(ch)}
             />
           ))}
 
           <Button
-            onClick={() => setAdding(true)}
+            onClick={() => navigate(`${base}/chapters/create`)}
             startIcon={<AddOutlined />}
             sx={{
               py: 2,
@@ -255,18 +251,6 @@ const ChaptersScreen = () => {
         </Box>
       )}
 
-      <AddChapterDialog
-        open={adding}
-        onClose={() => setAdding(false)}
-        subjectId={id}
-        nextNumber={nextNumber}
-      />
-      <AddChapterDialog
-        open={!!renaming}
-        onClose={() => setRenaming(null)}
-        subjectId={id}
-        chapter={renaming}
-      />
       <ConfirmDialog
         open={!!confirming}
         onClose={() => setConfirming(null)}

@@ -19,9 +19,6 @@ import {
 import BreadcrumbLayout from "../../../../components/Shared/BreadcrumbLayout";
 import BigEmptyState from "../../../../components/Shared/BigEmptyState";
 import ConfirmDialog from "../../../../components/Shared/ConfirmDialog";
-import AddLessonDialog from "../../../../components/Teacher/AddLessonDialog";
-import AddChapterDialog from "../../../../components/Teacher/AddChapterDialog";
-import EditLessonDialog from "../../../../components/Teacher/EditLessonDialog";
 import StudentPreview from "../../../../components/Teacher/StudentPreview";
 import { useT } from "../../../../i18n/LanguageContext";
 import { statusTokens, tokens } from "../../../../theme";
@@ -61,6 +58,7 @@ const ChapterDetailScreen = () => {
   const { role } = useAuth();
   const isTeacher = role === "teacher";
   const base = isTeacher ? `/app/teacher/subjects/${id}` : `/app/admin/catalog/subjects/${id}`;
+  const chapterBase = `${base}/chapters/${chapterId}`;
 
   const { data: subjectRes } = useGetSubjectQuery(id);
   const { data: chapterRes, isLoading } = useGetChapterQuery(chapterId);
@@ -68,9 +66,6 @@ const ChapterDetailScreen = () => {
   const [updateChapter, { isLoading: toggling }] = useUpdateChapterMutation();
   const [deleteContent, { isLoading: deletingTopic }] = useDeleteContentMutation();
 
-  const [adding, setAdding] = useState(false);
-  const [renaming, setRenaming] = useState(false);
-  const [editing, setEditing] = useState(null);
   const [previewing, setPreviewing] = useState(null);
   const [confirming, setConfirming] = useState(null);
 
@@ -113,7 +108,7 @@ const ChapterDetailScreen = () => {
       isBusy={isLoading || isFetching}
       headerActions={
         topics.length > 0 && (
-          <Button variant="contained" startIcon={<AddOutlined />} onClick={() => setAdding(true)}>
+          <Button variant="contained" startIcon={<AddOutlined />} onClick={() => navigate(`${chapterBase}/topics/create`)}>
             {t("topic.add")}
           </Button>
         )
@@ -179,7 +174,7 @@ const ChapterDetailScreen = () => {
               <Button
                 variant="outlined"
                 startIcon={<DriveFileRenameOutlineOutlined />}
-                onClick={() => setRenaming(true)}
+                onClick={() => navigate(`${chapterBase}/edit`)}
               >
                 {t("chapter.settings")}
               </Button>
@@ -203,7 +198,7 @@ const ChapterDetailScreen = () => {
           title={t("topic.emptyTitle")}
           body={t("topic.emptyBody")}
           actionLabel={t("topic.addFirst")}
-          onAction={() => setAdding(true)}
+          onAction={() => navigate(`${chapterBase}/topics/create`)}
         />
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -272,7 +267,7 @@ const ChapterDetailScreen = () => {
                   <Button
                     size="small"
                     startIcon={<EditOutlined sx={{ fontSize: 16 }} />}
-                    onClick={() => setEditing(topic)}
+                    onClick={() => navigate(`${chapterBase}/topics/${topic._id}/edit`)}
                   >
                     {t("action.edit")}
                   </Button>
@@ -290,7 +285,7 @@ const ChapterDetailScreen = () => {
           })}
 
           <Button
-            onClick={() => setAdding(true)}
+            onClick={() => navigate(`${chapterBase}/topics/create`)}
             startIcon={<AddOutlined />}
             sx={{
               py: 2,
@@ -309,19 +304,6 @@ const ChapterDetailScreen = () => {
         ← {t("chapter.backToChapters")}
       </Button>
 
-      <AddLessonDialog
-        open={adding}
-        onClose={() => setAdding(false)}
-        chapterId={chapterId}
-        chapterName={chapter ? `${t("chapter.one")} ${chapter.chapterNumber}: ${chapter.title}` : ""}
-      />
-      <AddChapterDialog
-        open={renaming}
-        onClose={() => setRenaming(false)}
-        subjectId={id}
-        chapter={chapter}
-      />
-      <EditLessonDialog open={!!editing} onClose={() => setEditing(null)} lesson={editing} />
       <StudentPreview
         open={!!previewing}
         onClose={() => setPreviewing(null)}
