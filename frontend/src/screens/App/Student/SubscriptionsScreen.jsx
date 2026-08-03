@@ -12,8 +12,15 @@ import { tokens } from "../../../theme";
 const fmt = (d) => new Date(d).toLocaleDateString();
 const TYPE_ICON = { subject: <MenuBookOutlined sx={{ fontSize: 30, color: tokens.faint }} />, year: <CalendarMonthOutlined sx={{ fontSize: 30, color: tokens.faint }} />, program: <SchoolOutlined sx={{ fontSize: 30, color: tokens.faint }} /> };
 
-const label = (s) =>
-  s.type === "subject" ? s.subject?.name : s.type === "year" ? s.year?.yearName : s.program?.name;
+const TYPE_LABEL = { subject: "Subject access", year: "Full year access", program: "Full program access" };
+
+// Never render a nameless card: if the linked subject/year/program is missing
+// or wasn't populated, fall back to what the subscription grants.
+const label = (s) => {
+  const named =
+    s.type === "subject" ? s.subject?.name : s.type === "year" ? s.year?.yearName : s.program?.name;
+  return named || TYPE_LABEL[s.type] || "Access";
+};
 
 const SubscriptionsScreen = () => {
   const { data, isLoading } = useGetMySubscriptionsQuery();

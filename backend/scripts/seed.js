@@ -63,14 +63,23 @@ let entitledCount = 0;
 
 if (activeSubjects.length > 0) {
   const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  // Point the subscription at a real program, otherwise the card on
+  // /app/student/subscriptions renders with no name.
+  const programId = activeSubjects[0].program;
+
   const blanketGrant = await Subscription.create({
     user: student2._id,
     type: "program",
+    program: programId,
     price: { amount: 0, currency: "NPR" }, // seeded, not a real purchase
     startedAt: new Date(),
     expiresAt,
     status: "active",
   });
+
+  // Mirror it onto the profile so the catalog resolves the same program even
+  // before falling back to entitlements.
+  await StudentProfile.updateOne({ user: student2._id }, { program: programId });
 
   await Promise.all(
     activeSubjects.map((subject) =>

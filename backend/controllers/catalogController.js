@@ -10,17 +10,48 @@ import Content from "../models/Content.js";
 import Quiz from "../models/Quiz.js";
 import { canAccessContent, canAccessChapter, hasActiveEntitlement } from "../utils/access.js";
 
+/**
+ * Which program's catalog should this student see?
+ *
+ * `StudentProfile.program` is the intended answer, but nothing in the purchase
+ * flow ever writes it — so relying on it alone left students who had genuinely
+ * paid staring at an empty catalog. Fall back to what they actually own: any
+ * active entitlement points at a subject, and every subject knows its program.
+ */
+const resolveStudentProgramId = async (userId, profile) => {
+  if (profile?.program) return profile.program;
+
+  const Entitlement = mongoose.models.Entitlement;
+  if (!Entitlement) return null;
+
+  const entitlements = await Entitlement.find({
+    student: userId,
+    isActive: true,
+    expiresAt: { $gt: new Date() },
+  }).select("subject");
+  if (entitlements.length === 0) return null;
+
+  const owned = await Subject.findOne({
+    _id: { $in: entitlements.map((e) => e.subject) },
+    isDeleted: false,
+  }).select("program");
+
+  return owned?.program ?? null;
+};
+
 // @route GET /api/catalog/me  (student) — their program's years + subjects
 export const getMyCatalog = asyncHandler(async (req, res) => {
   const profile = await StudentProfile.findOne({ user: req.user._id });
-  if (!profile?.program) {
+  const programId = await resolveStudentProgramId(req.user._id, profile);
+
+  if (!programId) {
     return res.status(200).json({
       data: { program: null, years: [] },
       message: "No program selected yet",
     });
   }
 
-  const program = await Program.findOne({ _id: profile.program, isActive: true, isDeleted: false });
+  const program = await Program.findOne({ _id: programId, isActive: true, isDeleted: false });
   if (!program) {
     return res.status(200).json({ data: { program: null, years: [] }, message: "OK" });
   }

@@ -27,7 +27,8 @@ import YearFormScreen from "../screens/App/Admin/Catalog/YearFormScreen";
 import SubjectListScreen from "../screens/App/Admin/Catalog/SubjectListScreen";
 import SubjectFormScreen from "../screens/App/Admin/Catalog/SubjectFormScreen";
 import SubjectHomeScreen from "../screens/App/Teacher/Subject/SubjectHomeScreen";
-import LessonsScreen from "../screens/App/Teacher/Subject/LessonsScreen";
+import ChaptersScreen from "../screens/App/Teacher/Subject/ChaptersScreen";
+import ChapterDetailScreen from "../screens/App/Teacher/Subject/ChapterDetailScreen";
 import SubjectQuestionsScreen from "../screens/App/Teacher/Subject/SubjectQuestionsScreen";
 import CouponListScreen from "../screens/App/Admin/Coupon/CouponListScreen";
 import CouponFormScreen from "../screens/App/Admin/Coupon/CouponFormScreen";
@@ -91,7 +92,8 @@ const AppRouter = () => {
         <Route path="admin/catalog/subjects" element={<AdminOnly><SubjectListScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/create" element={<AdminOnly><SubjectFormScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id" element={<AdminOnly><SubjectHomeScreen /></AdminOnly>} />
-        <Route path="admin/catalog/subjects/:id/lessons" element={<AdminOnly><LessonsScreen /></AdminOnly>} />
+        <Route path="admin/catalog/subjects/:id/lessons" element={<AdminOnly><ChaptersScreen /></AdminOnly>} />
+        <Route path="admin/catalog/subjects/:id/chapters/:chapterId" element={<AdminOnly><ChapterDetailScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id/questions" element={<AdminOnly><SubjectQuestionsScreen /></AdminOnly>} />
         <Route path="admin/catalog/subjects/:id/edit" element={<AdminOnly><SubjectFormScreen /></AdminOnly>} />
         {/* Coupons */}
@@ -102,7 +104,8 @@ const AppRouter = () => {
         <Route path="teacher" element={<TeacherOnly><TeacherDashboardScreen /></TeacherOnly>} />
         <Route path="teacher/subjects" element={<TeacherOnly><TeacherSubjectsScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id" element={<TeacherOnly><SubjectHomeScreen /></TeacherOnly>} />
-        <Route path="teacher/subjects/:id/lessons" element={<TeacherOnly><LessonsScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects/:id/lessons" element={<TeacherOnly><ChaptersScreen /></TeacherOnly>} />
+        <Route path="teacher/subjects/:id/chapters/:chapterId" element={<TeacherOnly><ChapterDetailScreen /></TeacherOnly>} />
         <Route path="teacher/subjects/:id/questions" element={<TeacherOnly><SubjectQuestionsScreen /></TeacherOnly>} />
         <Route path="teacher/quizzes" element={<TeacherOnly><QuizListScreen /></TeacherOnly>} />
         <Route path="teacher/quizzes/create" element={<TeacherOnly><QuizFormScreen /></TeacherOnly>} />

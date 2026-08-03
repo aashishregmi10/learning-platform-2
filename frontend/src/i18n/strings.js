@@ -76,6 +76,18 @@ export const strings = {
   "chapter.lessonCount": { en: "lessons", np: "पाठहरू" },
   "chapter.noLessons": { en: "Nothing in this chapter yet.", np: "यो अध्यायमा अझै केही छैन।" },
   "chapter.lastEdited": { en: "Last edited", np: "अन्तिम सम्पादन" },
+  "chapter.open": { en: "Open chapter", np: "अध्याय खोल्नुहोस्" },
+  "chapter.manageTopics": { en: "Manage topics", np: "विषयवस्तु व्यवस्थापन" },
+  "chapter.backToChapters": { en: "Back to chapters", np: "अध्यायहरूमा फर्कनुहोस्" },
+  "chapter.settings": { en: "Chapter settings", np: "अध्याय सेटिङ" },
+  "topic.emptyTitle": { en: "No topics in this chapter yet", np: "यस अध्यायमा अझै कुनै विषयवस्तु छैन" },
+  "topic.emptyBody": {
+    en: "Topics are the notes, PDFs and videos your students actually open. Add the first one to get started.",
+    np: "विषयवस्तु भनेको विद्यार्थीले खोल्ने नोट, PDF र भिडियो हुन्। सुरु गर्न पहिलो थप्नुहोस्।",
+  },
+  "topic.count": { en: "topics", np: "विषयवस्तुहरू" },
+  "topic.add": { en: "Add a topic", np: "विषयवस्तु थप्नुहोस्" },
+  "topic.addFirst": { en: "Add the first topic", np: "पहिलो विषयवस्तु थप्नुहोस्" },
 
   // ---- visibility, in plain words -------------------------------------
   "visible.yes": { en: "Students can see this", np: "विद्यार्थीले देख्न सक्छन्" },
