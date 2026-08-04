@@ -41,7 +41,7 @@ const GuestLayout = () => (
           to="/"
           style={{ textDecoration: "none", color: "var(--primary)", fontWeight: 800, fontSize: 19, letterSpacing: "-0.02em" }}
         >
-          B.Sc Nepal
+          Atomica Academy Nepal
         </Link>
         <nav style={{ display: "flex", gap: 28, alignItems: "center" }}>
           <Link to="/" style={navLink}>
@@ -83,7 +83,7 @@ const GuestLayout = () => (
           fontSize: 13,
         }}
       >
-        <span>© {new Date().getFullYear()} B.Sc Nepal — built for Tribhuvan University students.</span>
+        <span>© {new Date().getFullYear()} Atomica Academy Nepal — built for Tribhuvan University students.</span>
         <Link to="/login" style={{ ...navLink, fontSize: 13, color: "var(--primary)" }}>
           Sign in
         </Link>

@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "B.Sc Nepal API",
+  "description": "Atomica Academy Nepal API",
   "main": "server.js",
   "type": "module",
   "scripts": {

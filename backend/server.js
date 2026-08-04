@@ -83,11 +83,11 @@ app.use("/api/payouts", payoutRoutes);
 //   app.use(express.static(dist));
 //   app.get("*", (_, res) => res.sendFile(path.join(dist, "index.html")));
 // } else {
-//   app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
+//   app.get("/", (_, res) => res.send("Atomica Academy Nepal API is running 🏃"));
 // }
 
 // ✅ KEEP ONLY THIS::
-app.get("/", (_, res) => res.send("B.Sc Nepal API is running 🏃"));
+app.get("/", (_, res) => res.send("Atomica Academy Nepal API is running 🏃"));
 
 app.use(NOT_FOUND_HANDLER);
 app.use(ERROR_HANDLER);

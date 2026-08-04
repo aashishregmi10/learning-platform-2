@@ -39,7 +39,7 @@ const STORAGE_KEY = "bscnepal.sidebarCollapsed";
 // The rail collapses to icons only; the choice persists so it survives a
 // reload. Mobile keeps the full-width temporary drawer either way — a 72px
 // rail on a phone would be worse than the hamburger.
-const SidebarLayout = ({ sidebar: Sidebar = null, title = "B.Sc Nepal" }) => {
+const SidebarLayout = ({ sidebar: Sidebar = null, title = "Atomica Academy Nepal" }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [collapsed, setCollapsed] = useState(() => {

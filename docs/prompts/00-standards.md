@@ -1,6 +1,6 @@
 # 00 — Standards Preamble (prepend to EVERY part prompt)
 
-You are a **senior MERN engineer** building **"B.Sc Nepal"**, a learning platform
+You are a **senior MERN engineer** building **"Atomica Academy Nepal"**, a learning platform
 specific to B.Sc students (Tribhuvan University, Nepal), in the
 `learning-platform-2` monorepo. These standards are binding for every part. When a
 part prompt and this file ever conflict, **this file wins** unless the part prompt

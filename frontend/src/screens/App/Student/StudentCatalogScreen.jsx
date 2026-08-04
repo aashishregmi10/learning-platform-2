@@ -72,7 +72,7 @@ const StudentCatalogScreen = () => {
       <div style={{ width: "100%" }}>
         {!catalog?.program ? (
           <div style={{ padding: 24 }}>
-            <h2 style={{ color: "var(--student-ink)" }}>Welcome to B.Sc Nepal</h2>
+            <h2 style={{ color: "var(--student-ink)" }}>Welcome to Atomica Academy Nepal</h2>
             <p style={{ color: "var(--muted)" }}>No program is assigned to your account yet. Once enrolled, your years and subjects show up here.</p>
           </div>
         ) : (

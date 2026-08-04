@@ -113,7 +113,7 @@ const HomeScreen = () => {
   if (!primaryProgram) {
     return (
       <div className="page" style={{ paddingBlock: 120, textAlign: "center" }}>
-        <h1 style={{ color: "var(--primary)", marginBottom: 8 }}>B.Sc Nepal</h1>
+        <h1 style={{ color: "var(--primary)", marginBottom: 8 }}>Atomica Academy Nepal</h1>
         <p style={{ color: tokens.muted }}>We&apos;re setting up the catalog — check back soon.</p>
       </div>
     );

@@ -93,8 +93,10 @@ const Dot = ({ color }) => (
 
 const iconSx = (item) => ({
   minWidth: 32,
-  // Each nav item carries its own accent so the rail scans by colour.
-  color: item.color ?? statusTokens.info.solid,
+  // Staff menus opt into a per-item accent to help scan a long list. Anything
+  // that doesn't (the student nav) stays neutral grey so it never competes with
+  // the content beside it — the active item alone takes the accent.
+  color: item.color ?? tokens.faint,
   "& svg": { fontSize: 20 },
 });
 

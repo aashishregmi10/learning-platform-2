@@ -66,7 +66,7 @@ const LoginScreen = () => {
       <Paper variant="outlined" sx={{ p: 4, width: 380, maxWidth: "100%" }}>
         <Link to="/" style={{ color: "var(--primary)", fontSize: 14, textDecoration: "none" }}>← Back to home</Link>
         <Typography variant="h5" sx={{ fontWeight: 700, color: "#171717", mb: 0.5, mt: 1.5 }}>
-          B.Sc Nepal
+          Atomica Academy Nepal
         </Typography>
         <Typography variant="body2" sx={{ color: "#71717A", mb: 3 }}>
           Sign in to continue
