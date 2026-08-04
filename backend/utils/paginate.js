@@ -24,6 +24,19 @@ export const facetPaginate = async (
   };
 };
 
-/** Case-insensitive regex match for a search term over one field. */
-export const searchMatch = (field, term) =>
-  term ? { [field]: { $regex: new RegExp(term, "i") } } : {};
+/**
+ * Case-insensitive "contains" match for a search box.
+ *
+ * The term is escaped rather than compiled as-is: a raw user string went
+ * straight into `new RegExp`, so a search for `(a+)+$` was a denial-of-service
+ * and one for `.*` scanned every document. Length is capped for the same
+ * reason. Non-string input (arrays from `?search[]=`) is ignored outright.
+ */
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+export const searchMatch = (field, term) => {
+  if (typeof term !== "string") return {};
+  const trimmed = term.trim().slice(0, 100);
+  if (!trimmed) return {};
+  return { [field]: { $regex: new RegExp(escapeRegex(trimmed), "i") } };
+};

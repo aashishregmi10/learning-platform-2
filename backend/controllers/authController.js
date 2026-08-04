@@ -7,6 +7,7 @@ import { signToken } from "../middlewares/authMiddleware.js";
 import User from "../models/User.js";
 import StudentProfile from "../models/StudentProfile.js";
 import TeacherProfile from "../models/TeacherProfile.js";
+import { requireEmail, requireString } from "../utils/validate.js";
 
 const googleClient = new OAuth2Client(env.googleClientId);
 
@@ -76,15 +77,12 @@ export const googleLogin = asyncHandler(async (req, res) => {
 
 // @route POST /api/auth/login  (admin + teacher)
 export const staffLogin = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400);
-    throw new Error("Email and password are required");
-  }
+  // Typed up front: an object body like { email: { $ne: null } } is rejected
+  // as a 422 here rather than reaching Mongo or crashing downstream.
+  const email = requireEmail(req.body?.email, res);
+  const password = requireString(req.body?.password, "password", res, { max: 200 });
 
-  const user = await User.findOne({ email: email.toLowerCase() }).select(
-    "+passwordHash"
-  );
+  const user = await User.findOne({ email }).select("+passwordHash");
 
   if (
     !user ||
@@ -113,9 +111,12 @@ export const staffLogin = asyncHandler(async (req, res) => {
 // Issues a token for a seed user by email so the student UI (Google-only)
 // can be exercised in development without a real Google account.
 export const devLogin = asyncHandler(async (req, res) => {
-  if (env.nodeEnv === "production") {
-    res.status(403);
-    throw new Error("Disabled in production");
+  // Two independent gates. This endpoint mints a session for ANY email with no
+  // password, so a single mis-set NODE_ENV would be a total auth bypass —
+  // it also has to be switched on explicitly.
+  if (env.nodeEnv === "production" || process.env.ENABLE_DEV_LOGIN !== "true") {
+    res.status(404);
+    throw new Error("Not found");
   }
   const { email } = req.body;
   const user = await User.findOne({ email: (email || "").toLowerCase() });

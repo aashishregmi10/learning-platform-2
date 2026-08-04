@@ -15,6 +15,7 @@ import {
   destroyAsset,
 } from "../config/cloudinary.config.js";
 import { logActivity } from "../services/activityLogService.js";
+import { sanitizeNoteHtml } from "../utils/sanitizeHtml.js";
 
 const toId = (id) =>
   mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
@@ -48,7 +49,9 @@ export const createContent = asyncHandler(async (req, res) => {
   });
 
   if (type === "note") {
-    content.noteData = { content: noteContent || "", isDownloadable: true };
+    // Sanitised on write, so the DB never stores an executable payload — the
+    // reader's DOMPurify pass is then a second layer, not the only one.
+    content.noteData = { content: sanitizeNoteHtml(noteContent), isDownloadable: true };
     content.status = "ready";
     content.isPublished = true;
     content.publishedAt = new Date();
@@ -235,7 +238,7 @@ export const updateContent = asyncHandler(async (req, res) => {
     if (req.body[f] !== undefined) content[f] = req.body[f];
   });
   if (req.body.noteContent !== undefined && content.type === "note") {
-    content.noteData.content = req.body.noteContent;
+    content.noteData.content = sanitizeNoteHtml(req.body.noteContent);
   }
   // A mistyped web address is the other thing teachers need to fix after saving.
   // Link targets live in storage.fileKey (set the same way on create).

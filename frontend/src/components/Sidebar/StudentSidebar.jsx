@@ -6,24 +6,34 @@ import {
 } from "@mui/icons-material";
 
 import SidebarMenu from "./SidebarMenu";
+import { statusTokens } from "../../theme";
 
-/**
- * Student nav is deliberately colourless.
- *
- * On the staff side a colour per item helps scan a long menu. Here the student
- * is trying to read a lesson — four brightly coloured icons beside the content
- * just compete with it. Everything stays neutral grey and only the active item
- * takes the accent.
- */
 const STUDENT_MENU = [
-  { title: "Catalog", path: "/app/student", icon: <HomeOutlined />, end: true },
+  {
+    title: "Catalog",
+    path: "/app/student",
+    icon: <HomeOutlined />,
+    end: true,
+    color: statusTokens.info.solid,
+  },
   {
     title: "My Subscriptions",
     path: "/app/student/subscriptions",
     icon: <CardMembershipOutlined />,
+    color: statusTokens.success.solid,
   },
-  { title: "Orders", path: "/app/student/orders", icon: <ReceiptLongOutlined /> },
-  { title: "Live Classes", path: "/app/student/live-classes", icon: <VideocamOutlined /> },
+  {
+    title: "Orders",
+    path: "/app/student/orders",
+    icon: <ReceiptLongOutlined />,
+    color: statusTokens.warning.solid,
+  },
+  {
+    title: "Live Classes",
+    path: "/app/student/live-classes",
+    icon: <VideocamOutlined />,
+    color: statusTokens.danger.solid,
+  },
 ];
 
 const StudentSidebar = () => <SidebarMenu menu={STUDENT_MENU} />;
